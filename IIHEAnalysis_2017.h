@@ -19,6 +19,7 @@
 #include <vector>
 #include <iostream>
 #include "TString.h"
+#include "TLorentzVector.h"
 
 using namespace std;
 
@@ -29,53 +30,130 @@ float norm_F(float x, float y){
 }
 
 
-double FakeRate(double taupt, TString HPS_WP, TString DM, TString eta) {
-  double SF=0.5;
+double topPtReweight(double pt) {
+  double aa = 1.08872;
+  double bb = 0.0119998;
+  double cc = 0.895139;
 
-  TFile* fake_file = new TFile("Reweighting/fakerate.root","R");
-  TString fake_string = "FakeRate_byTauPt_data_"+HPS_WP+"_"+DM+"_"+eta;
-  TH1F* fake_histo = (TH1F*) fake_file->Get(fake_string);
+  double w_top = exp(-aa-bb*pt) + cc;
 
-  int iBin = -1;
-  if (taupt >= 20 && taupt < 150) iBin = fake_histo->FindBin(taupt);
-  if (iBin != -1) SF = fake_histo->GetBinContent(iBin);
-  fake_file->Close();
+  return w_top;
+}
+
+
+double GetCollinearMass(TLorentzVector tau, TLorentzVector mu,  TLorentzVector MET) {
+
+  double METproj=fabs((MET.Px()*tau.Px()+MET.Py()*tau.Py())/tau.Pt());
+  double xth=1;
+  if((tau.Pt()+METproj)!=0) xth=tau.Pt()/(tau.Pt()+METproj);
+  double mass_vis=(tau+mu).M();
+  return mass_vis/sqrt(xth);
+}
+
+
+double GetLepToTauFR(TString lep, double eta) {
 
   double reweight = 1;
+  if (lep == "mu") {
+    if (fabs(eta) < 0.4) reweight = 1.17;
+    else if (fabs(eta) < 0.8 && fabs(eta) > 0.4) reweight = 1.29;
+    else if (fabs(eta) < 1.2 && fabs(eta) > 0.8) reweight = 1.14;
+    else if (fabs(eta) < 1.7 && fabs(eta) > 1.2) reweight = 0.93;
+    else if (fabs(eta) < 2.3 && fabs(eta) > 1.7) reweight = 1.61;
+  }
+  else if (lep == "ele") {
+    if (fabs(eta) < 1.460) reweight = 1.09;
+    else if (fabs(eta) > 1.558) reweight = 1.19;
+  }
+  return reweight;
+
+}
+
+
+
+double FakeRate_SSMtLow(double taupt, double jetpt, TString eta) {
+  double SF=0.2;
+
+  TFile* fake_file = new TFile("Reweighting/fakerate_SSMtLow.root","R");
+
+  TString sector_string = "_taupt_";
+
+  if (jetpt >= 1000) jetpt = 999;
+  if (taupt >= 1000) taupt = 999;
+
+  if ( (taupt > 0) && (taupt < 300) ) {
+    sector_string += "0_300_jetpt_";
+
+    if ( (jetpt > 0) && (jetpt < 150) )          sector_string += "0_150";
+    else if ( (jetpt >= 150) && (jetpt < 300) )  sector_string += "150_300";
+    else if ( (jetpt >= 300) && (jetpt < 1000) ) sector_string += "300_1000";
+  }
+  else if ( (taupt > 300) && (taupt < 1000) ) {
+    sector_string += "300_1000_jetpt_";
+
+    if ( (jetpt > 0) && (jetpt < 300) )          sector_string += "0_300";
+    else if ( (jetpt >= 300) && (jetpt < 1000) ) sector_string += "300_1000";
+  }
+
+  double reweight = 0;
+
+  TString hname = "hratio_data_eta_"+eta+"_taupt_jetpt_pass" + sector_string;
+  TH2F* h_fake = (TH2F*) fake_file->Get(hname);
+  int iBin = h_fake->FindBin(taupt, jetpt);
+  SF = h_fake->GetBinContent(iBin);
   if (SF != 1) reweight = SF/(1-SF);
 
   return reweight;
 
 }
 
-double FakeRateFlat(TString HPS_WP, TString DM) {
-  double SF=0.5;
+
+
+double FakeRate_mumu(double taupt, double jetpt) {
+  double SF=0.2;
 
   TFile* fake_file = new TFile("Reweighting/fakerate.root","R");
-  TString fake_string = "ptratio_data_"+HPS_WP+"_"+DM+"_total";
-  TH1F* fake_histo = (TH1F*) fake_file->Get(fake_string);
 
-  int iBin = 1; //the first bin, with all low pt taus, is the interesting one                                                                                                                                                                 
-  SF = fake_histo->GetBinContent(iBin);
-  fake_file->Close();
+  TString sector_string = "_taupt_";
 
-  double reweight = 1;
+  if (jetpt >= 1000) jetpt = 999;
+  if (taupt >= 1000) taupt = 999;
+
+  if ( (taupt > 0) && (taupt < 300) ) {
+    if ( (jetpt > 0) && (jetpt < 120) )          sector_string += "0_300_jetpt_0_120";
+    else if ( (jetpt >= 120) && (jetpt < 300) )  sector_string += "0_300_jetpt_120_300";
+    else if ( (jetpt >= 300) && (jetpt < 1000) ) sector_string += "0_1000_jetpt_300_1000";
+  }
+  else if ( (taupt > 300) && (taupt < 1000) ) {
+    if ( (jetpt > 0) && (jetpt < 300) )          sector_string += "300_1000_jetpt_0_300";
+    else if ( (jetpt >= 300) && (jetpt < 1000) ) sector_string += "0_1000_jetpt_300_1000";
+  }
+
+  double reweight = 0;
+
+  TString hname = "hratio_data_total_taupt_jetpt_pass" + sector_string;
+  TH2F* h_fake = (TH2F*) fake_file->Get(hname);
+  int iBin = h_fake->FindBin(taupt, jetpt);
+  SF = h_fake->GetBinContent(iBin);
   if (SF != 1) reweight = SF/(1-SF);
 
   return reweight;
 
 }
+
 
 
 pair<double,double> getSF (float mupt, float mueta) {
+  //highest pt is 120 GeV
+  if (mupt >= 120) mupt = 119;
   TFile* id_file = new TFile("Reweighting/RunBCDEF_SF_ID.root","R");
-  TH2F* id_histo = (TH2F*) id_file->Get("NUM_MediumID_DEN_genTracks_pt_abseta");
+  TH2F* id_histo = (TH2F*) id_file->Get("NUM_HighPtID_DEN_genTracks_pair_newTuneP_probe_pt_abseta");
   int bin_in = id_histo->FindBin(mupt, fabs(mueta));
   double id_sf = id_histo->GetBinContent(bin_in);
   id_file->Close();
 
   TFile* iso_file = new TFile("Reweighting/RunBCDEF_SF_ISO.root","R");
-  TH2F* iso_histo = (TH2F*) iso_file->Get("NUM_TightRelIso_DEN_MediumID_pt_abseta");
+  TH2F* iso_histo = (TH2F*) iso_file->Get("NUM_LooseRelTkIso_DEN_TrkHighPtID_pair_newTuneP_probe_pt_abseta");
   bin_in = iso_histo->FindBin(mupt, fabs(mueta));
   double iso_sf = iso_histo->GetBinContent(bin_in);
   iso_file->Close();
@@ -89,10 +167,12 @@ pair<double,double> getSF (float mupt, float mueta) {
 }
 
 
-double GetTriggerMuonIDMuonIsoReweight(float mu_pt, float mu_eta) {
-  //scale factor files that need to be open                                                                                                                                                                                                   
+double GetReweight_highmass(float mu_pt, float mu_eta) {
+  //highest pt for trigger is 1200 GeV
+  if (mu_pt >= 1200) mu_pt = 1199;
+  //scale factor files that need to be open
   TFile* tr_file = new TFile("Reweighting/EfficienciesAndSF_RunBtoF_Nov17Nov2017.root","R");
-  TH2F* tr_histo = (TH2F*) tr_file->Get("IsoMu27_PtEtaBins/pt_abseta_ratio");
+  TH2F* tr_histo = (TH2F*) tr_file->Get("Mu50_PtEtaBins/pt_abseta_ratio");
   int bin_in = tr_histo->FindBin(mu_pt, fabs(mu_eta));
   double tr_sf = tr_histo->GetBinContent(bin_in);
   tr_file->Close();
@@ -5925,10 +6005,10 @@ void IIHEAnalysis::Init(TTree *tree)
    //fChain->SetBranchAddress("trig_HLT_Mu50_prescale", &trig_HLT_Mu50_prescale, &b_trig_HLT_Mu50_prescale);
    //fChain->SetBranchAddress("trig_HLT_Mu55_accept", &trig_HLT_Mu55_accept, &b_trig_HLT_Mu55_accept);
    //fChain->SetBranchAddress("trig_HLT_Mu55_prescale", &trig_HLT_Mu55_prescale, &b_trig_HLT_Mu55_prescale);
-   //fChain->SetBranchAddress("trig_HLT_OldMu100_accept", &trig_HLT_OldMu100_accept, &b_trig_HLT_OldMu100_accept);
-   //fChain->SetBranchAddress("trig_HLT_OldMu100_prescale", &trig_HLT_OldMu100_prescale, &b_trig_HLT_OldMu100_prescale);
-   //fChain->SetBranchAddress("trig_HLT_TkMu100_accept", &trig_HLT_TkMu100_accept, &b_trig_HLT_TkMu100_accept);
-   //fChain->SetBranchAddress("trig_HLT_TkMu100_prescale", &trig_HLT_TkMu100_prescale, &b_trig_HLT_TkMu100_prescale);
+   fChain->SetBranchAddress("trig_HLT_OldMu100_accept", &trig_HLT_OldMu100_accept, &b_trig_HLT_OldMu100_accept);
+   fChain->SetBranchAddress("trig_HLT_OldMu100_prescale", &trig_HLT_OldMu100_prescale, &b_trig_HLT_OldMu100_prescale);
+   fChain->SetBranchAddress("trig_HLT_TkMu100_accept", &trig_HLT_TkMu100_accept, &b_trig_HLT_TkMu100_accept);
+   fChain->SetBranchAddress("trig_HLT_TkMu100_prescale", &trig_HLT_TkMu100_prescale, &b_trig_HLT_TkMu100_prescale);
    //fChain->SetBranchAddress("trig_HLT_PFHT500_PFMET100_PFMHT100_IDTight_accept", &trig_HLT_PFHT500_PFMET100_PFMHT100_IDTight_accept, &b_trig_HLT_PFHT500_PFMET100_PFMHT100_IDTight_accept);
    //fChain->SetBranchAddress("trig_HLT_PFHT500_PFMET100_PFMHT100_IDTight_prescale", &trig_HLT_PFHT500_PFMET100_PFMHT100_IDTight_prescale, &b_trig_HLT_PFHT500_PFMET100_PFMHT100_IDTight_prescale);
    //fChain->SetBranchAddress("trig_HLT_PFHT500_PFMET110_PFMHT110_IDTight_accept", &trig_HLT_PFHT500_PFMET110_PFMHT110_IDTight_accept, &b_trig_HLT_PFHT500_PFMET110_PFMHT110_IDTight_accept);
