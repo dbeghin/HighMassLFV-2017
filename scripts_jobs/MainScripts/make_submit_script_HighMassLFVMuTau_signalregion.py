@@ -56,6 +56,7 @@ if __name__ == "__main__":
             command2 = "dccp dcap://maite.iihe.ac.be"+   i[0:-1] + " $scratchdir/" + "\n"
             bare_fname = i[len(pnfn[jj]):-1]
             command2 = command2 + "\n" + "./" + code_name + ".exe " + "Outout" + str(ligne)+myname[jj]  + ".root " +   bare_fname
+            command2 = command2 + "\n" + "rm -f " +   bare_fname
             command2 = command2 + " \n\n\n"
             outFile.write(command2)
             ligne=ligne+1
