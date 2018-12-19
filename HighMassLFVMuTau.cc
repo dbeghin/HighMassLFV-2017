@@ -313,7 +313,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
           if (ll_p4.M() > 400) reject_event = true;
         }
         else {
-          //cout << "??" << endl;
+          cout << "??" << endl;
         }
       }//close is this DY inclusive question
       else if (WJetsinc) {
@@ -344,7 +344,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
           if (lnu_p4.Pt() > 100) reject_event = true;
         }
         else {
-          //cout << "??" << endl;
+          cout << "??" << endl;
         }
       }//close the is this WJets inclusive question
       else if (TTinc || WWinc) {
@@ -384,7 +384,8 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
         }
       }
       //close the is this TT inclusive question
-      if (reject_event) continue;
+      //if (reject_event) continue;
+      //FIXME when there are high mass samples
 
       double TT_ptreweight = 1;
       if (TT) {
@@ -402,9 +403,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 
       vector<TLorentzVector> tauhp4;
       tauhp4.clear();
-      vector<TLorentzVector> taup4, tauvisp4, anyleptonp4, genmup4, genelep4;
-      taup4.clear();
-      tauvisp4.clear();
+      vector<TLorentzVector> anyleptonp4, genmup4, genelep4;
       anyleptonp4.clear();
       genmup4.clear();
       genelep4.clear();
@@ -412,25 +411,8 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
       tau_ind.clear(), tau_dm.clear();
       if (!data) {
 	//start loop over all simulated particules
-	int moth_ind = -1;
-	TLorentzVector mup4, nutaup4, totalp4, totalvisp4, totalvismetp4, p4;
-	bool foundmu = false, foundtau = false;
-	vector<bool> tauh;
-	int n_nus = 0;
+	TLorentzVector mup4, totalvisp4, p4;
 	for (unsigned int iMC = 0; iMC < mc_pt->size(); ++iMC) {
-	  if (abs(mc_pdgId->at(iMC)) == 15) {
-	    p4.SetPxPyPzE(mc_px->at(iMC), mc_py->at(iMC), mc_pz->at(iMC), mc_energy->at(iMC));
-	    if (mc_pt->at(iMC) > 20) {	
-	      if (p4.Pt() < 20) continue;
-	      if (p4.Pt() > 10000) continue;
-	      foundtau = true;
-	      taup4.push_back(p4);
-	      tauvisp4.push_back(p4);
-	      tau_ind.push_back(iMC);
-	      tauh.push_back(true);
-	      tau_dm.push_back(2);
-	    }
-	  }
 	  if (abs(mc_pdgId->at(iMC)) == 11 || abs(mc_pdgId->at(iMC)) == 13) {
 	    if (mc_pt->at(iMC) < 10) continue;
 	    p4.SetPxPyPzE(mc_px->at(iMC), mc_py->at(iMC), mc_pz->at(iMC), mc_energy->at(iMC));
@@ -440,47 +422,17 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	    if (abs(mc_pdgId->at(iMC)) == 13) genmup4.push_back(p4);
 	    if (abs(mc_pdgId->at(iMC)) == 11) genelep4.push_back(p4);
 	  }
-	}
-	//find out about the tau daughters
-	for (unsigned int iMC = 0; iMC < mc_pt->size(); ++iMC) {
-	  moth_ind = mc_mother_index->at(iMC).at(0);
-	  if (moth_ind < 0) continue;
-	  if (abs(mc_pdgId->at(moth_ind)) == 15) {
-	    for (unsigned int iTau = 0; iTau<tau_ind.size(); ++iTau) {
-	      if (moth_ind == tau_ind[iTau]) {
-		if (abs(mc_pdgId->at(iMC)) == 16) {
-		  nutaup4.SetPxPyPzE(mc_px->at(iMC), mc_py->at(iMC), mc_pz->at(iMC), mc_energy->at(iMC));
-		  tauvisp4[iTau] = taup4[iTau] - nutaup4;
-		  ++n_nus;
-		}
-		else if (abs(mc_pdgId->at(iMC)) == 11) {
-		  //not a hadron
-		  tauh[iTau] = false;
-		  tau_dm[iTau] = 0;
-		}
-		else if (abs(mc_pdgId->at(iMC)) == 13) {
-		  //not a hadron
-		  tauh[iTau] = false;
-		  tau_dm[iTau] = 1;
-		}
-	      }
-	    }
-	  }
-	}
-	for (unsigned int iTau = 0; iTau<tau_ind.size(); ++iTau) {
-	  if (tauh[iTau]) tauhp4.push_back(tauvisp4[iTau]), anyleptonp4.push_back(tauvisp4[iTau]);
-	}
-	//n2 += tauhp4.size();
+	}//end MC loop
 
-	if (print_count < 20 /*&& foundtau*/) {
-	  ++print_count;
-	  cout << endl << ev_event << endl << mc_pt->size() << endl;
-	  for (unsigned int iMC = 0; iMC < mc_pt->size(); ++iMC) {
-	    cout << iMC << "  " << mc_pdgId->at(iMC) << "  ";
-	    for (unsigned int iMother = 0; iMother< mc_mother_index->at(iMC).size(); ++iMother) cout << "| " << mc_mother_index->at(iMC).at(iMother);
-	    cout << " |" << mc_pt->at(iMC) << "  " << mc_eta->at(iMC) << "  " << mc_phi->at(iMC) << endl;
-	  }
+	for (unsigned int iMC = 0; iMC < mc_tau_had_pt->size(); ++iMC) {
+	  if (mc_pt->at(iMC) < 10) continue;
+	  p4.SetPtEtaPhiE(mc_tau_had_pt->at(iMC), mc_tau_had_eta->at(iMC), mc_tau_had_phi->at(iMC), mc_tau_had_energy->at(iMC)); 
+	  if (p4.Pt() < 10) continue;
+	  if (p4.Pt() > 10000) continue;
+	  tauhp4.push_back( p4 );
+	  anyleptonp4.push_back( p4 );
 	}
+
       }//end is this not-data? condition
 
 
@@ -692,12 +644,11 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  bool tau_match = false;
 	  if (!data && !Signal) {
 	    //fill gen histos to understand wth is going on
-	    hgen[7]->Fill(taup4.size(), mc_w_sign);
-	    for (unsigned int iGen = 0; iGen<taup4.size(); ++iGen) {
-	      hgen[0]->Fill(taup4[iGen].Pt(), mc_w_sign);
-	      hgen[1]->Fill(taup4[iGen].Eta(), mc_w_sign);
-	      hgen[2]->Fill(taup4[iGen].Phi(), mc_w_sign);
-	      hgen[8]->Fill(tau_dm[iGen], mc_w_sign);
+	    hgen[7]->Fill(tauhp4.size(), mc_w_sign);
+	    for (unsigned int iGen = 0; iGen<tauhp4.size(); ++iGen) {
+	      hgen[0]->Fill(tauhp4[iGen].Pt(), mc_w_sign);
+	      hgen[1]->Fill(tauhp4[iGen].Eta(), mc_w_sign);
+	      hgen[2]->Fill(tauhp4[iGen].Phi(), mc_w_sign);
 	    }
 
 	    bool ele_match = false;
