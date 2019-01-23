@@ -228,8 +228,8 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
    vector<TString> h_names;
    h_names.push_back("taupt_jetpt_pass"); int iJetPtPass = h_names.size()-1;
    h_names.push_back("taupt_jetpt_fail"); int iJetPtFail = h_names.size()-1;
-   h_names.push_back("taupt_mupt_pass");  int iMuPtPass  = h_names.size()-1;
-   h_names.push_back("taupt_mupt_fail");  int iMuPtFail  = h_names.size()-1;
+   h_names.push_back("taupt_ratio_pass");  int iRatioPass  = h_names.size()-1;
+   h_names.push_back("taupt_ratio_fail");  int iRatioFail  = h_names.size()-1;
 
    vector<TString> dms;
    dms.push_back("DM0");  int k_DM0  = dms.size()-1;
@@ -803,15 +803,15 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 
 
 	  //TH2's for the fake rate
-	  int iJetPt = -1, iMuPt = -1;
+	  int iJetPt = -1, iRatio = -1;
 	  //Tau histos
 	  if (tau_byTightIsolationMVArun2v1DBoldDMwLT->at(iTau) > 0.5) {
 	    iJetPt = iJetPtPass;
-	    iMuPt  = iMuPtPass;
+	    iRatio  = iRatioPass;
 	  }
 	  else {
 	    iJetPt = iJetPtFail;
-	    iMuPt  = iMuPtFail;
+	    iRatio  = iRatioFail;
 	  }
 
 	  //decay mode
@@ -827,8 +827,10 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  }
 
 	  if (CR_number == 100) {
+	    double ratio = 1;
+	    if (jet_p4.Pt() != 0) ratio = tau_p4.Pt()/jet_p4.Pt();
 	    hh[iJetPt][kMth][k_dm][l_eta][jTauN]->Fill(tau_p4.Pt(), jet_p4.Pt(), final_weight);
-	    hh[iMuPt][kMth][k_dm][l_eta][jTauN]->Fill(tau_p4.Pt(), mu_p4.Pt(), final_weight);
+	    hh[iRatio][lMth][k_dm][l_eta][jTauN]->Fill(tau_p4.Pt(), ratio, final_weight);
 	    if (tau_byTightIsolationMVArun2v1DBoldDMwLT->at(iTau) < 0.5) continue;
 	  }
 
