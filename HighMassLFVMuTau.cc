@@ -297,7 +297,6 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
             //cout << LHE_pdgid->at(iLHE) << "  " << LHE_Pt->at(iLHE) << "  " << LHE_Eta->at(iLHE) << "  " << LHE_Phi->at(iLHE) << "  " << LHE_E->at(iLHE) << endl;
           }
       	  if (LHE_Pt->at(iLHE) <= 0) continue; 
-      	  if (LHE_pdgid->at(iLHE) < 10) continue; 
           if (LHE_pdgid->at(iLHE) == 11 || LHE_pdgid->at(iLHE) == 13 || LHE_pdgid->at(iLHE) == 15) {
             l1_p4.SetPtEtaPhiE(LHE_Pt->at(iLHE),LHE_Eta->at(iLHE),LHE_Phi->at(iLHE),LHE_E->at(iLHE));
             l1_pdgid = LHE_pdgid->at(iLHE);
@@ -313,7 +312,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
           if (ll_p4.M() > 400) reject_event = true;
         }
         else {
-          cout << "??" << endl;
+          cout << "??" << LHE_pdgid->size() << endl;
         }
       }//close is this DY inclusive question
       else if (WJetsinc) {
@@ -423,9 +422,8 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	    if (abs(mc_pdgId->at(iMC)) == 11) genelep4.push_back(p4);
 	  }
 	}//end MC loop
-
 	for (unsigned int iMC = 0; iMC < mc_tau_had_pt->size(); ++iMC) {
-	  if (mc_pt->at(iMC) < 10) continue;
+	  if (mc_tau_had_pt->at(iMC) < 10) continue;
 	  p4.SetPtEtaPhiE(mc_tau_had_pt->at(iMC), mc_tau_had_eta->at(iMC), mc_tau_had_phi->at(iMC), mc_tau_had_energy->at(iMC)); 
 	  if (p4.Pt() < 10) continue;
 	  if (p4.Pt() > 10000) continue;
@@ -593,36 +591,37 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	      
 	    //tau isolation
 	    if (CR_number < 2 || CR_number == 9) {
-	      if (tau_byTightIsolationMVArun2v1DBoldDMwLT->at(iTau) < 0.5) continue;
+	      if (tau_byTightIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) < 0.5) continue;
 	    }
 	    else {
-	      if (tau_byTightIsolationMVArun2v1DBoldDMwLT->at(iTau) > 0.5) continue;
-	      if (tau_byVLooseIsolationMVArun2v1DBoldDMwLT->at(iTau) < 0.5) continue;
+	      if (tau_byTightIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) > 0.5) continue;
+	      if (tau_byVVLooseIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) < 0.5) continue;
 	    }
 	  }
 	  else {
 	    if (CR_number == 100) {
 	      if (reliso > 0.1) continue;
-	      //if (tau_byTightIsolationMVArun2v1DBoldDMwLT->at(iTau) < 0.5) continue;
-	      if (tau_byVLooseIsolationMVArun2v1DBoldDMwLT->at(iTau) < 0.5) continue;
+	      //if (tau_byTightIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) < 0.5) continue;
+	      if (tau_byVVLooseIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) < 0.5) continue;
 	    }	      
 	    if (CR_number == 101) {
 	      if (reliso > 0.1) continue;
-	      if (tau_byTightIsolationMVArun2v1DBoldDMwLT->at(iTau) > 0.5) continue;
-	      if (tau_byVLooseIsolationMVArun2v1DBoldDMwLT->at(iTau) < 0.5) continue;
+	      if (tau_byTightIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) > 0.5) continue;
+	      if (tau_byVVLooseIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) < 0.5) continue;
 	    }	      
 	    if (CR_number == 102) {
 	      if (reliso > 0.1) continue;
-	      if (tau_byTightIsolationMVArun2v1DBoldDMwLT->at(iTau) < 0.5) continue;
+	      if (tau_byTightIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) < 0.5) continue;
 	      if (Mt<80) continue;
 	    }	      
 	    if (CR_number == 103) {
 	      if (reliso > 0.1) continue;
-	      if (tau_byTightIsolationMVArun2v1DBoldDMwLT->at(iTau) > 0.5) continue;
-	      if (tau_byVLooseIsolationMVArun2v1DBoldDMwLT->at(iTau) < 0.5) continue;
+	      if (tau_byTightIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) > 0.5) continue;
+	      if (tau_byVVLooseIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) < 0.5) continue;
 	      if (Mt<80) continue;
 	    }	      
 	  }
+
 
 	  int kMth = -1;
 	  if (Mt < 120) {
@@ -805,7 +804,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  //TH2's for the fake rate
 	  int iJetPt = -1, iRatio = -1;
 	  //Tau histos
-	  if (tau_byTightIsolationMVArun2v1DBoldDMwLT->at(iTau) > 0.5) {
+	  if (tau_byTightIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) > 0.5) {
 	    iJetPt = iJetPtPass;
 	    iRatio  = iRatioPass;
 	  }
@@ -826,19 +825,19 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	    k_dm = k_DM10;
 	  }
 
+	  if (dR < 0.5) continue;
 	  if (CR_number == 100) {
 	    double ratio = 1;
 	    if (jet_p4.Pt() != 0) ratio = tau_p4.Pt()/jet_p4.Pt();
 	    hh[iJetPt][kMth][k_dm][l_eta][jTauN]->Fill(tau_p4.Pt(), jet_p4.Pt(), final_weight);
-	    hh[iRatio][lMth][k_dm][l_eta][jTauN]->Fill(tau_p4.Pt(), ratio, final_weight);
-	    if (tau_byTightIsolationMVArun2v1DBoldDMwLT->at(iTau) < 0.5) continue;
+	    hh[iRatio][kMth][k_dm][l_eta][jTauN]->Fill(tau_p4.Pt(), ratio, final_weight);
+	    if (tau_byTightIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) < 0.5) continue;
 	  }
 
 
 	  h[kMth][jTauN][9]->Fill(dphi_mutau, final_weight);
 	  h[kMth][jTauN][10]->Fill(dphi_METtau, final_weight);
 	  
-	  if (dR < 0.5) continue;
 	  h[kMth][jTauN][0]->Fill(vis_p4.M(), final_weight);
 	  h[kMth][jTauN][1]->Fill(total_p4.M(), final_weight);
 	  h[kMth][jTauN][2]->Fill(tau_p4.Pt(), final_weight);
