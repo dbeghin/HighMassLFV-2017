@@ -17,6 +17,53 @@ myname.append("DYamc_1")
 myoption.append("DYinc")
 filesperjob.append("50")
 
+pnfn.append("/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_ext1/181221_140119/0000/")
+mynick.append("DYToLL_amc")
+myname.append("DYamc_ext_0")
+myoption.append("DYinc")
+filesperjob.append("50")
+
+pnfn.append("/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_ext1/181221_140119/0001/")
+mynick.append("DYToLL_amc")
+myname.append("DYamc_ext_1")
+myoption.append("DYinc")
+filesperjob.append("50")
+
+pnfn.append("/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_ext1/181221_140119/0002/")
+mynick.append("DYToLL_amc")
+myname.append("DYamc_ext_2")
+myoption.append("DYinc")
+filesperjob.append("50")
+
+pnfn.append("/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_ext1/181221_140119/0003/")
+mynick.append("DYToLL_amc")
+myname.append("DYamc_ext_3")
+myoption.append("DYinc")
+filesperjob.append("50")
+
+pnfn.append("/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_ext1/181221_140119/0004/")
+mynick.append("DYToLL_amc")
+myname.append("DYamc_ext_4")
+myoption.append("DYinc")
+filesperjob.append("50")
+
+pnfn.append("/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_ext1/181221_140119/0005/")
+mynick.append("DYToLL_amc")
+myname.append("DYamc_ext_5")
+myoption.append("DYinc")
+filesperjob.append("50")
+
+pnfn.append("/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_ext1/181221_140119/0006/")
+mynick.append("DYToLL_amc")
+myname.append("DYamc_ext_6")
+myoption.append("DYinc")
+filesperjob.append("50")
+
+pnfn.append("/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_ext1/181221_140119/0007/")
+mynick.append("DYToLL_amc")
+myname.append("DYamc_ext_7")
+myoption.append("DYinc")
+filesperjob.append("50")
 
 
 

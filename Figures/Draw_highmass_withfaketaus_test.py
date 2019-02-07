@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 import ROOT
 import re
@@ -14,7 +15,7 @@ def add_lumi():
     lumi.SetTextColor(    1 )
     lumi.SetTextSize(0.06)
     lumi.SetTextFont (   42 )
-    lumi.AddText("2016, 35.9 fb^{-1} (13 TeV)")
+    lumi.AddText("2017, 41.53 fb^{-1} (13 TeV)")
     return lumi
 
 def add_CMS():
@@ -60,7 +61,7 @@ c=ROOT.TCanvas("canvas","",0,0,600,600)
 c.cd()
 
 #file=ROOT.TFile("final.root","r")
-file=ROOT.TFile("histos_highmassmutau_test_rebinned.root","r")
+file=ROOT.TFile("histos_highmassmutau.root","r")
 
 adapt=ROOT.gROOT.GetColor(12)
 new_idx=ROOT.gROOT.GetListOfColors().GetSize() + 1
@@ -140,9 +141,11 @@ for k in range (0,nvar):
         TT=file.Get("TT_"+var_in)
         VV=file.Get("VV_"+var_in)
         DY=file.Get("DY_"+var_in)
-        ST=file.Get("ST_"+var_in)
+        #ST=file.Get("ST_"+var_in)
         #Signal=file.Get("Signal_"+var_in)
-        Faketau=file.Get("faketau_"+var_in)
+        #Faketau=file.Get("faketau_"+var_in)
+        #Faketau_high=file.Get("faketau_fakerate_up_"+var_in)
+        #Faketau_low=file.Get("faketau_fakerate_down_"+var_in)
         
         Data.GetXaxis().SetTitle("")
         Data.GetXaxis().SetTitleSize(0)
@@ -161,60 +164,66 @@ for k in range (0,nvar):
         
         
         #ST.GetXaxis().SetTitle("")
-        ST.GetXaxis().SetTitleSize(0.06)
-        ST.GetXaxis().SetTitle(photogenic_var[k])
-        ST.GetXaxis().SetNdivisions(505)
-        ST.GetYaxis().SetLabelFont(42)
-        ST.GetYaxis().SetLabelOffset(0.01)
-        ST.GetYaxis().SetLabelSize(0.06)
-        ST.GetYaxis().SetTitleSize(0.075)
-        ST.GetYaxis().SetTitleOffset(1.04)
-        ST.SetTitle("")
-        ST.GetYaxis().SetTitle("Events/bin")
+        #ST.GetXaxis().SetTitleSize(0.06)
+        #ST.GetXaxis().SetTitle(photogenic_var[k])
+        #ST.GetXaxis().SetNdivisions(505)
+        #ST.GetYaxis().SetLabelFont(42)
+        #ST.GetYaxis().SetLabelOffset(0.01)
+        #ST.GetYaxis().SetLabelSize(0.06)
+        #ST.GetYaxis().SetTitleSize(0.075)
+        #ST.GetYaxis().SetTitleOffset(1.04)
+        #ST.SetTitle("")
+        #ST.GetYaxis().SetTitle("Events/bin")
         
         
         
         #QCD.SetFillColor(ROOT.TColor.GetColor("#ffccff"))
-        W.SetFillColor(ROOT.TColor.GetColor("#ffccff"))
+        #W.SetFillColor(ROOT.TColor.GetColor("#de5a6a"))
         VV.SetFillColor(ROOT.TColor.GetColor("#d89a6a"))
         TT.SetFillColor(ROOT.TColor.GetColor("#9999cc"))
         DY.SetFillColor(ROOT.TColor.GetColor("#ffcc66"))
-        ST.SetFillColor(ROOT.TColor.GetColor("#c338e2"))
-        Faketau.SetFillColor(ROOT.TColor.GetColor("#de5a6a"))
+        #ST.SetFillColor(ROOT.TColor.GetColor("#c338e2"))
+        #Faketau.SetFillColor(ROOT.TColor.GetColor("#de5a6a"))
         
         Data.SetMarkerStyle(20)
         Data.SetMarkerSize(1)
         #QCD.SetLineColor(1)
-        W.SetLineColor(1)
+        #W.SetLineColor(1)
         VV.SetLineColor(1)
         TT.SetLineColor(1)
         DY.SetLineColor(1)
-        ST.SetLineColor(1)
-        Faketau.SetLineColor(1)
+        #ST.SetLineColor(1)
+        #Faketau.SetLineColor(1)
         Data.SetLineColor(1)
         Data.SetLineWidth(2)
         
         
         stack=ROOT.THStack("stack","stack")
         stack.Add(DY)
-        stack.Add(ST)
+        #stack.Add(ST)
         #stack.Add(QCD)
-        stack.Add(W)
+        #stack.Add(W)
         stack.Add(VV)
         stack.Add(TT)
-        stack.Add(Faketau)
+        #stack.Add(Faketau)
         
         errorBand = TT.Clone()
         #errorBand.Add(QCD)
-        errorBand.Add(ST)
+        #errorBand.Add(ST)
         errorBand.Add(DY)
         errorBand.Add(VV)
-        errorBand.Add(W)
-        errorBand.Add(Faketau)
+        #errorBand.Add(Faketau)
         errorBand.SetMarkerSize(0)
         errorBand.SetFillColor(new_idx)
         errorBand.SetFillStyle(3001)
         errorBand.SetLineWidth(1)
+        
+        #h4=Faketau_high.Clone()
+        #h4.Add(Faketau, -1)
+        #for iii in range(1, h4.GetNbinsX()+1):
+        #    bin_error = pow(pow(h4.GetBinContent(iii),2) + pow(errorBand.GetBinError(iii),2),0.5)
+        #    errorBand.SetBinError(iii, bin_error)
+
         
         pad1 = ROOT.TPad("pad1","pad1",0,0.35,1,1)
         #pad1 = ROOT.TPad("pad1","pad1",0,0,1,1)
@@ -240,10 +249,10 @@ for k in range (0,nvar):
         Data.GetXaxis().SetLabelSize(0)
         if (var_log_dic[var[k]]):
             Data.SetMaximum(Data.GetMaximum()*1000)#1.5)#FIXME
-            ST.SetMaximum(Data.GetMaximum()*200)#1.5)#FIXME
+            #ST.SetMaximum(Data.GetMaximum()*200)#1.5)#FIXME
         else:
             Data.SetMaximum(Data.GetMaximum()*2)#2.5)#FIXME
-            ST.SetMaximum(Data.GetMaximum()*2)#2.5)#FIXME
+            #ST.SetMaximum(Data.GetMaximum()*2)#2.5)#FIXME
         Data.SetMinimum(0.01)
         Data.Draw("e")
         #ST.Draw("hist")
@@ -261,12 +270,12 @@ for k in range (0,nvar):
         legende.AddEntry(Data,"Observed","elp")
         #legende.AddEntry(Signal,"1 TeV RPV#rightarrow #mu #tau","f")
         legende.AddEntry(DY,"Z#rightarrow#tau #tau","f")
-        legende.AddEntry(Faketau,"Fake #tau bg","f")
+        #legende.AddEntry(Faketau,"Fake #tau bg","f")
         legende.AddEntry(TT,"t#bar{t}+jets","f")
-        legende.AddEntry(W,"W+jets","f")
+        #legende.AddEntry(W,"W+jets","f")
         legende.AddEntry(VV,"Diboson","f")
         #legende.AddEntry(QCD,"QCD multijet","f")
-        legende.AddEntry(ST,"Single Top","f")
+        #legende.AddEntry(ST,"Single Top","f")
         legende.AddEntry(errorBand,"Uncertainty","f")
         legende.Draw()
         
@@ -325,10 +334,12 @@ for k in range (0,nvar):
         for iii in range (1,hwoE.GetSize()-2):
             hwoE.SetBinError(iii,0)
         h3.Sumw2()
+
         h1.Sumw2()
         h1.SetStats(0)
         h1.Divide(hwoE)
         h3.Divide(hwoE)
+
         h1.GetXaxis().SetTitle(photogenic_var[k])
         h1.GetXaxis().SetLabelSize(0.08)
         h1.GetYaxis().SetLabelSize(0.08)

@@ -15,7 +15,7 @@ def add_lumi():
     lumi.SetTextColor(    1 )
     lumi.SetTextSize(0.06)
     lumi.SetTextFont (   42 )
-    lumi.AddText("2016, 35.9 fb^{-1} (13 TeV)")
+    lumi.AddText("2017, 41.53 fb^{-1} (13 TeV)")
     return lumi
 
 def add_CMS():
@@ -141,7 +141,7 @@ for k in range (0,nvar):
         TT=file.Get("TT_"+var_in)
         VV=file.Get("VV_"+var_in)
         DY=file.Get("DY_"+var_in)
-        ST=file.Get("ST_"+var_in)
+        #ST=file.Get("ST_"+var_in)
         #Signal=file.Get("Signal_"+var_in)
         Faketau=file.Get("faketau_"+var_in)
         Faketau_high=file.Get("faketau_fakerate_up_"+var_in)
@@ -164,16 +164,16 @@ for k in range (0,nvar):
         
         
         #ST.GetXaxis().SetTitle("")
-        ST.GetXaxis().SetTitleSize(0.06)
-        ST.GetXaxis().SetTitle(photogenic_var[k])
-        ST.GetXaxis().SetNdivisions(505)
-        ST.GetYaxis().SetLabelFont(42)
-        ST.GetYaxis().SetLabelOffset(0.01)
-        ST.GetYaxis().SetLabelSize(0.06)
-        ST.GetYaxis().SetTitleSize(0.075)
-        ST.GetYaxis().SetTitleOffset(1.04)
-        ST.SetTitle("")
-        ST.GetYaxis().SetTitle("Events/bin")
+        #ST.GetXaxis().SetTitleSize(0.06)
+        #ST.GetXaxis().SetTitle(photogenic_var[k])
+        #ST.GetXaxis().SetNdivisions(505)
+        #ST.GetYaxis().SetLabelFont(42)
+        #ST.GetYaxis().SetLabelOffset(0.01)
+        #ST.GetYaxis().SetLabelSize(0.06)
+        #ST.GetYaxis().SetTitleSize(0.075)
+        #ST.GetYaxis().SetTitleOffset(1.04)
+        #ST.SetTitle("")
+        #ST.GetYaxis().SetTitle("Events/bin")
         
         
         
@@ -182,7 +182,7 @@ for k in range (0,nvar):
         VV.SetFillColor(ROOT.TColor.GetColor("#d89a6a"))
         TT.SetFillColor(ROOT.TColor.GetColor("#9999cc"))
         DY.SetFillColor(ROOT.TColor.GetColor("#ffcc66"))
-        ST.SetFillColor(ROOT.TColor.GetColor("#c338e2"))
+        #ST.SetFillColor(ROOT.TColor.GetColor("#c338e2"))
         Faketau.SetFillColor(ROOT.TColor.GetColor("#de5a6a"))
         
         Data.SetMarkerStyle(20)
@@ -192,7 +192,7 @@ for k in range (0,nvar):
         VV.SetLineColor(1)
         TT.SetLineColor(1)
         DY.SetLineColor(1)
-        ST.SetLineColor(1)
+        #ST.SetLineColor(1)
         Faketau.SetLineColor(1)
         Data.SetLineColor(1)
         Data.SetLineWidth(2)
@@ -200,7 +200,7 @@ for k in range (0,nvar):
         
         stack=ROOT.THStack("stack","stack")
         stack.Add(DY)
-        stack.Add(ST)
+        #stack.Add(ST)
         #stack.Add(QCD)
         #stack.Add(W)
         stack.Add(VV)
@@ -209,7 +209,7 @@ for k in range (0,nvar):
         
         errorBand = TT.Clone()
         #errorBand.Add(QCD)
-        errorBand.Add(ST)
+        #errorBand.Add(ST)
         errorBand.Add(DY)
         errorBand.Add(VV)
         errorBand.Add(Faketau)
@@ -218,11 +218,11 @@ for k in range (0,nvar):
         errorBand.SetFillStyle(3001)
         errorBand.SetLineWidth(1)
         
-        h4=Faketau_high.Clone()
-        h4.Add(Faketau, -1)
-        for iii in range(1, h4.GetNbinsX()+1):
-            bin_error = pow(pow(h4.GetBinContent(iii),2) + pow(errorBand.GetBinError(iii),2),0.5)
-            errorBand.SetBinError(iii, bin_error)
+        #h4=Faketau_high.Clone()
+        #h4.Add(Faketau, -1)
+        #for iii in range(1, h4.GetNbinsX()+1):
+        #    bin_error = pow(pow(h4.GetBinContent(iii),2) + pow(errorBand.GetBinError(iii),2),0.5)
+        #    errorBand.SetBinError(iii, bin_error)
 
         
         pad1 = ROOT.TPad("pad1","pad1",0,0.35,1,1)
@@ -249,10 +249,8 @@ for k in range (0,nvar):
         Data.GetXaxis().SetLabelSize(0)
         if (var_log_dic[var[k]]):
             Data.SetMaximum(Data.GetMaximum()*1000)#1.5)#FIXME
-            ST.SetMaximum(Data.GetMaximum()*200)#1.5)#FIXME
         else:
             Data.SetMaximum(Data.GetMaximum()*2)#2.5)#FIXME
-            ST.SetMaximum(Data.GetMaximum()*2)#2.5)#FIXME
         Data.SetMinimum(0.01)
         Data.Draw("e")
         #ST.Draw("hist")
@@ -275,7 +273,7 @@ for k in range (0,nvar):
         #legende.AddEntry(W,"W+jets","f")
         legende.AddEntry(VV,"Diboson","f")
         #legende.AddEntry(QCD,"QCD multijet","f")
-        legende.AddEntry(ST,"Single Top","f")
+        #legende.AddEntry(ST,"Single Top","f")
         legende.AddEntry(errorBand,"Uncertainty","f")
         legende.Draw()
         
