@@ -226,8 +226,8 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 
 
    vector<TString> h_names;
-   h_names.push_back("taupt_jetpt_pass"); int iJetPtPass = h_names.size()-1;
-   h_names.push_back("taupt_jetpt_fail"); int iJetPtFail = h_names.size()-1;
+   //h_names.push_back("taupt_jetpt_pass"); int iJetPtPass = h_names.size()-1;
+   //h_names.push_back("taupt_jetpt_fail"); int iJetPtFail = h_names.size()-1;
    h_names.push_back("taupt_ratio_pass");  int iRatioPass  = h_names.size()-1;
    h_names.push_back("taupt_ratio_fail");  int iRatioFail  = h_names.size()-1;
 
@@ -248,7 +248,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	 for (unsigned int l = 0; l<eta.size(); ++l) {
 	   for (unsigned int m = 0; m<taun.size(); ++m) {
 	     TString nname = h_names[i]+"_"+Mth[j]+"_"+dms[k]+"_"+eta[l]+"_"+taun[m];
-	     hh[i][j][k][l].push_back( new TH2F(nname, nname, 1000, 0, 1000, 1000, 0, 1000) );
+	     hh[i][j][k][l].push_back( new TH2F(nname, nname, 1000, 0, 1000, 1000, 0, 10) );
 	     hh[i][j][k][l][m]->Sumw2();
 	   }
 	 }
@@ -805,11 +805,11 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  int iJetPt = -1, iRatio = -1;
 	  //Tau histos
 	  if (tau_byTightIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) > 0.5) {
-	    iJetPt = iJetPtPass;
+	    //iJetPt = iJetPtPass;
 	    iRatio  = iRatioPass;
 	  }
 	  else {
-	    iJetPt = iJetPtFail;
+	    //iJetPt = iJetPtFail;
 	    iRatio  = iRatioFail;
 	  }
 
@@ -829,7 +829,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  if (CR_number == 100) {
 	    double ratio = 1;
 	    if (jet_p4.Pt() != 0) ratio = tau_p4.Pt()/jet_p4.Pt();
-	    hh[iJetPt][kMth][k_dm][l_eta][jTauN]->Fill(tau_p4.Pt(), jet_p4.Pt(), final_weight);
+	    //hh[iJetPt][kMth][k_dm][l_eta][jTauN]->Fill(tau_p4.Pt(), jet_p4.Pt(), final_weight);
 	    hh[iRatio][kMth][k_dm][l_eta][jTauN]->Fill(tau_p4.Pt(), ratio, final_weight);
 	    if (tau_byTightIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) < 0.5) continue;
 	  }

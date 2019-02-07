@@ -21,7 +21,7 @@ TH1F* MC_histo(TString var, TFile* file_in, double xs, long Nevents, int rebin) 
 
   cout << file_in->GetName() << endl;
 
-  double lumi = 40.769 * pow(10,3); //luminosity in pb^-1
+  double lumi = 41.529 * pow(10,3); //luminosity in pb^-1
 
   double e_Nevents = pow(Nevents,0.5);
   double e_xs = 0.01*xs;
@@ -90,6 +90,9 @@ int main(int argc, char** argv) {
   else if (CR == "CR103") {
     folder_in = "HighMassLFVMuTau/WjetsTest_CR103";
   }
+  else if (CR == "prefake") {
+    folder_in = "HighMassLFVMuTau/SignalRegion_CR100";
+  }    
   else {
     cout << "unrecognised argument!!!" << endl;
   }
@@ -156,8 +159,8 @@ int main(int argc, char** argv) {
   TFile* file_in_WZ = new TFile(folder_in+"/Arranged_WZ/WZ.root", "R");
   TFile* file_in_ZZ = new TFile(folder_in+"/Arranged_ZZ/ZZ.root", "R");
 
-  TFile* file_in_ST_top = new TFile(folder_in+"/Arranged_ST_top/ST_top.root", "R");
-  TFile* file_in_ST_antitop = new TFile(folder_in+"/Arranged_ST_antitop/ST_antitop.root", "R");
+  //TFile* file_in_ST_top = new TFile(folder_in+"/Arranged_ST_top/ST_top.root", "R");
+  //TFile* file_in_ST_antitop = new TFile(folder_in+"/Arranged_ST_antitop/ST_antitop.root", "R");
 
 
   TFile* file_in_signal = new TFile(folder_in+"/Arranged_RPV/RPV.root", "R");
@@ -249,8 +252,8 @@ int main(int argc, char** argv) {
   double xs_signal = 20;
 
   //Nevents
-  vector<double> N_DY;
-  double N_DY_lowmass = 142161151;            N_DY.push_back(N_DY_lowmass);   
+  vector<double> N_DY;  
+  double N_DY_lowmass = 141442384;            N_DY.push_back(N_DY_lowmass);   
   //double N_DY_400to500 = 151168;	      N_DY.push_back(N_DY_400to500);  
   //double N_DY_500to700 = 144087;	      N_DY.push_back(N_DY_500to700);  
   //double N_DY_700to800 = 136874;	      N_DY.push_back(N_DY_700to800);  
@@ -266,23 +269,6 @@ int main(int argc, char** argv) {
   double N_WJets_400to600 = 364427 + 376433;			      N_WJets.push_back(N_WJets_400to600);
   double N_WJets_600toInf = 396336 + 396394;                          N_WJets.push_back(N_WJets_600toInf);
 
-
-  double N_QCD_muenriched = 22093506;//9951232;//check metadata
-  vector<double> N_QCD;
-  long N_QCD_15to30 = 37585689;              N_QCD.push_back(N_QCD_15to30);
-  long N_QCD_30to50 = 9979945;               N_QCD.push_back(N_QCD_30to50);
-  long N_QCD_50to80 = 9954259;               N_QCD.push_back(N_QCD_50to80);
-  long N_QCD_80to120 = 7608728+6986638;      N_QCD.push_back(N_QCD_80to120);
-  long N_QCD_120to170 = 5504047+6324260;     N_QCD.push_back(N_QCD_120to170);
-  long N_QCD_170to300 = 6855630+6799704;     N_QCD.push_back(N_QCD_170to300);
-  long N_QCD_300to470 = 4150323+14771394;    N_QCD.push_back(N_QCD_300to470);
-  long N_QCD_470to600 = 3866704;             N_QCD.push_back(N_QCD_470to600);
-  long N_QCD_600to800 = 3810427+9496102;     N_QCD.push_back(N_QCD_600to800);
-  long N_QCD_800to1000 = 13715052;           N_QCD.push_back(N_QCD_800to1000);
-  long N_QCD_1000to1400 = 2829635+6539554;   N_QCD.push_back(N_QCD_1000to1400);
-  long N_QCD_1400to1800 = 312291+2310326;    N_QCD.push_back(N_QCD_1400to1800);
-  long N_QCD_1800to2400 = 397083+1549881;    N_QCD.push_back(N_QCD_1800to2400);
-  long N_QCD_2400to3200 = 398491+550068;     N_QCD.push_back(N_QCD_2400to3200); 
 
 
   vector<double> N_TT;
@@ -411,12 +397,12 @@ int main(int argc, char** argv) {
       }
     }
     if ((CR == "CR100") || (CR == "CR102")) {
-      //for (unsigned int k = 0; k<Mth.size(); ++k) {
-      //	cout << file_in_faketau->GetName() << endl;
-      //	TH1F* h_faketaus = (TH1F*) file_in_faketau -> Get("faketau_"+vars[i]+"_"+Mth[k]);
-      //	//h_faketaus->Rebin(rebin);
-      //	h_faketaus->Write();
-      //}FIXME
+      for (unsigned int k = 0; k<Mth.size(); ++k) {
+      	cout << file_in_faketau->GetName() << endl;
+      	TH1F* h_faketaus = (TH1F*) file_in_faketau -> Get("faketau_"+vars[i]+"_"+Mth[k]);
+      	//h_faketaus->Rebin(rebin);
+      	h_faketaus->Write();
+      }
     }
   }
   file_out->Close();

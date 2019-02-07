@@ -34,9 +34,16 @@ sample_path = {}
 
 
 path_DYToLL_amc=[
-'/pnfs/iihe/cms/store/user/dbeghin/2017METCorrected/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/181026_160409/0000/',
-'/pnfs/iihe/cms/store/user/dbeghin/2017METCorrected/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_ext/181026_160251/0000/',
-'/pnfs/iihe/cms/store/user/dbeghin/2017METCorrected/MC/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_ext/181026_160251/0001/',
+'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5/181214_095738/0000/',
+'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5/181214_095738/0001/',
+'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_ext1/181221_140119/0000/',
+'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_ext1/181221_140119/0001/',
+'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_ext1/181221_140119/0002/',
+'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_ext1/181221_140119/0003/',
+'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_ext1/181221_140119/0004/',
+'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_ext1/181221_140119/0005/',
+'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_ext1/181221_140119/0006/',
+'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5_ext1/181221_140119/0007/',
 ]
 
 #path_DY1J=[
@@ -66,8 +73,8 @@ path_DYToLL_amc=[
 ########################### WJets ############################
 
 path_WJet_mad  =[
-'/pnfs/iihe/cms/store/user/dbeghin/2017METCorrected/MC/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/181026_160421/0000/',
-'/pnfs/iihe/cms/store/user/dbeghin/2017METCorrected/MC/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_ext/181026_160308/0000/',
+'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_TuneCP5_13TeV/181214_095754/0000/',
+'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/crab_WJetsToLNu_TuneCP5_13TeV/181214_095754/0001/',
 ]
 
 #path_W1J = [
@@ -91,19 +98,19 @@ path_WJet_mad  =[
 
 
 path_WW=[
-'/pnfs/iihe/cms/store/user/dbeghin/2017METCorrected/MC/WW_TuneCP5_13TeV-pythia8/crab_WW_TuneCP5_13TeV-pythia8/181026_160205/0000/',
+'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/WW_TuneCP5_13TeV-pythia8/crab_WW_TuneCP5_13TeV-pythia8/181214_095828/0000/',
 ]
 
 ############################# WWTo2L2Nv ############################
 #
 ############################## WZ ###########################
 path_WZ=[
-'/pnfs/iihe/cms/store/user/dbeghin/2017METCorrected/MC/WZ_TuneCP5_13TeV-pythia8/crab_WZ_TuneCP5_13TeV-pythia8/181029_132825/0000/',
+'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/WZ_TuneCP5_13TeV-pythia8/crab_WZ_TuneCP5_13TeV-pythia8/181214_095808/0000/',
 ]
 
 ################################ ZZ #########################
 path_ZZ=[
-'/pnfs/iihe/cms/store/user/dbeghin/2017METCorrected/MC/ZZ_TuneCP5_13TeV-pythia8/crab_ZZ_TuneCP5_13TeV-pythia8/181029_132759/0000/',
+'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/ZZ_TuneCP5_13TeV-pythia8/crab_ZZ_TuneCP5_13TeV-pythia8/181214_095851/0000/',
 ]
 
 ################################## ST ###################
@@ -122,20 +129,18 @@ path_ZZ=[
 #path_TT_inclusive=['/pnfs/iihe/cms/store/user/wenxing/RunIISummer17MiniAOD-92X/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/crab_TT_TuneCUETP8M2T4_13TeV-powheg-pythia8_ext1/171019_161505/0000/','/pnfs/iihe/cms/store/user/wenxing/RunIISummer17MiniAOD-92X/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/crab_TT_TuneCUETP8M2T4_13TeV-powheg-pythia8_ext1/171019_161505/0001/','/pnfs/iihe/cms/store/user/wenxing/RunIISummer17MiniAOD-92X/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/crab_TT_TuneCUETP8M2T4_13TeV-powheg-pythia8_ext2/171019_161445/0000/','/pnfs/iihe/cms/store/user/wenxing/RunIISummer17MiniAOD-92X/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/crab_TT_TuneCUETP8M2T4_13TeV-powheg-pythia8_ext2/171019_161445/0001/']
 
 path_TT_2L2Nu=[
-'/pnfs/iihe/cms/store/user/dbeghin/2017METCorrected/MC/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/crab_TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/181029_132733/0000/',
+'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/crab_TTTo2L2Nu_TuneCP5/181214_095723/0000/',
 ]
 
 path_TT_SemiLeptonic=[
-'/pnfs/iihe/cms/store/user/dbeghin/2017METCorrected/MC/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/crab_TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/181029_132920/0000/',
-'/pnfs/iihe/cms/store/user/dbeghin/2017METCorrected/MC/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/crab_TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/181029_132920/0001/',
-'/pnfs/iihe/cms/store/user/dbeghin/2017METCorrected/MC/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/crab_TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/181029_132920/0002/',
+'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/crab_TTToSemiLeptonic_TuneCP5/181214_095653/0000/',
+'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/crab_TTToSemiLeptonic_TuneCP5/181214_095653/0001/',
 ]
 
-path_TT_had = [
-'/pnfs/iihe/cms/store/user/dbeghin/2017METCorrected/MC/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/crab_TTToHadronic_TuneCP5_13TeV-powheg-pythia8/181029_132853/0000/',
-'/pnfs/iihe/cms/store/user/dbeghin/2017METCorrected/MC/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/crab_TTToHadronic_TuneCP5_13TeV-powheg-pythia8/181029_132853/0001/',
-'/pnfs/iihe/cms/store/user/dbeghin/2017METCorrected/MC/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/crab_TTToHadronic_TuneCP5_13TeV-powheg-pythia8/181029_132853/0002/',
-]
+#path_TT_had = [
+#'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/crab_TTToHadronic_TuneCP5/181214_095709/0000/',
+#'/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/crab_TTToHadronic_TuneCP5/181214_095709/0001/',
+#]
 
 ################################# GJet #####################
 #path_GJ_40_100 =['/pnfs/iihe/cms/store/user/amkalsi/Moriond2018/GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8/crab_GJets_HT-40To100/180218_162343/0000/']
@@ -241,7 +246,7 @@ sample_path['DYToLL_amc']     =path_DYToLL_amc
 #sample_path['DY2J']          = path_DY2J         
 #sample_path['DY3J']          = path_DY3J         
 #sample_path['DY4J']          = path_DY4J         
-sample_path['TT_had']        = path_TT_had       
+#sample_path['TT_had']        = path_TT_had       
 sample_path['TT_2l2nu']      = path_TT_2L2Nu       
 sample_path['TT_semilep']    = path_TT_SemiLeptonic
 #sample_path['QCD_20_30']     = path_QCD_20_30    

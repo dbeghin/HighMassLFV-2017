@@ -21,7 +21,7 @@ using namespace std;
 TH1F* MC_histo(TString var, TFile* file_in, double xs, long Nevents, int rebin) {
   cout << file_in->GetName() << endl;
 
-  double lumi = 40.769 * pow(10,3); //luminosity in pb^-1
+  double lumi = 41.529 * pow(10,3); //luminosity in pb^-1
 
   double e_Nevents = pow(Nevents,0.5);
   double e_xs = 0.01*xs;
@@ -44,7 +44,7 @@ TH1F* MC_histo(TString var, TFile* file_in, double xs, long Nevents, int rebin) 
 TH2F* MC_histo_TH2(TString var, TFile* file_in, double xs, long Nevents, int rebin) {
   cout << file_in->GetName() << endl;
 
-  double lumi = 35.9 * pow(10,3); //luminosity in pb^-1
+  double lumi = 41.529 * pow(10,3); //luminosity in pb^-1
 
   double e_Nevents = pow(Nevents,0.5);
   double e_xs = 0.01*xs;
@@ -179,7 +179,8 @@ int main(int argc, char** argv) {
   //Nevents
   vector<double> N_DY;
   //double N_DY_lowmass = 142161151;  N_DY.push_back(N_DY_lowmass);   
-  double N_DY_lowmass = 18576627;  N_DY.push_back(N_DY_lowmass);   
+  //double N_DY_lowmass = 18576627;  N_DY.push_back(N_DY_lowmass);   
+  double N_DY_lowmass = 141442384;  N_DY.push_back(N_DY_lowmass);   
 
   vector<double> N_WJets;
   double N_WJets_lowpt = 57025279 + 29584813;                         N_WJets.push_back(N_WJets_lowpt);	 

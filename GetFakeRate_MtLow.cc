@@ -47,7 +47,8 @@ int main(/*int argc, char** argv*/) {
 
 
   vector<float> xpoints_taupt {0, 30, 40, 50, 60, 70, 80, 100, 120, 150, 300, 1000};
-  vector<float> ypoints_ratio {0, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1., 10.};
+  vector<float> ypoints_ratio {0, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 1., 10.};
+  //vector<float> ypoints_ratio {0, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1., 10.};
 
 
   vector<TH2D*> h[names.size()][vars.size()][dms.size()][eta.size()];
@@ -146,7 +147,7 @@ int main(/*int argc, char** argv*/) {
         hfail_ratio_data[half_k].push_back( new TH1D(name_in, name_in, array_size_y-1, rebin_array_y) );
       }
         
-      //integrate out the Y part
+      //Integrate out the Y part
       int jBinX = 1, binStartX = 1;
       int nBinsY = h_data[k][i]->GetNbinsY();
       while (jBinX <= array_size_x) {
