@@ -5,6 +5,8 @@
 #include "TString.h"
 #include <iostream>
 #include <vector>
+#include "meta.h"
+#include "TLeaf.h"
 
 using namespace std;
 
@@ -22,14 +24,53 @@ int main(int argc, char** argv) {
   TFile *fIn = TFile::Open(inname.c_str());
   TTree* tree = (TTree*) fIn->Get("IIHEAnalysis");
 
+  TTree* mmeta = (TTree*) fIn->Get("meta");
+  meta* m = new meta(mmeta);
+  Float_t nEvents = m->Loop(type);
 
   IIHEAnalysis* a = new IIHEAnalysis(tree);
-  a->Loop(phase, type, out_name, mc_nickname);
+  a->Loop(phase, type, out_name, mc_nickname, nEvents);
   fIn->Close();
   return 0;
 }
 
-void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_name, string mc_nickname) {
+
+
+//Get weighted events
+Float_t meta::Loop(string type_of_data) {
+  if (fChain == 0) return -1;
+
+  bool data;
+  if (type_of_data == "Data" || type_of_data == "data" || type_of_data == "singlephoton" || type_of_data == "SinglePhoton" || type_of_data == "singlemu" || type_of_data == "SingleMu") {
+    data = true;
+  }
+  else {
+    data = false;
+  }
+
+  Long64_t nentries = fChain->GetEntriesFast();
+
+  Long64_t nbytes = 0, nb = 0;
+  Float_t nEvents = -1;
+  for (Long64_t jentry=0; jentry<nentries;jentry++) {
+    Long64_t ientry = LoadTree(jentry);
+    if (ientry < 0) break;
+    nb = fChain->GetEntry(jentry);   nbytes += nb;
+    
+    if (data) {
+      nEvents = nEventsRaw;
+    }
+    else {
+      nEvents = mc_nEventsWeighted;
+    }
+  }
+  return nEvents;
+}
+
+
+
+//main analysis loop
+void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_name, string mc_nickname, Float_t nEvents) {
    if (fChain == 0) return;
 
 
@@ -797,8 +838,8 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  }
 
 
-	  //if ((CR_number == 101) || (CR_number == 103)) final_weight *= FakeRate(tau_p4.Pt(), jet_p4.Pt()); //FIXME
-	  if ((CR_number == 101) || (CR_number == 103)) final_weight = first_weight*FakeRate_SSMtLow(tau_p4.Pt(), jet_p4.Pt(), eta_string);
+	  //if ((CR_number == 101) || (CR_number == 103)) final_weight = first_weight*FakeRate_SSMtLow(tau_p4.Pt(), jet_p4.Pt(), eta_string);
+	  if ((CR_number == 101) || (CR_number == 103)) final_weight = first_weight*FakeRate_factorised(tau_p4.Pt(), jet_p4.Pt(), eta_string);
 
 
 	  //TH2's for the fake rate
@@ -861,7 +902,10 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
    }//loop over events
 
 
+   TH1F* h_total_events =  new TH1F("weighted_events", "weighted_events", 1, 0, 1);
+   h_total_events->Fill(0.5, nEvents);
    file_out->cd();
+   h_total_events->Write();
    for (unsigned int i = 0; i<histo_names.size(); ++i) for (unsigned int j = 0; j<taun.size(); ++j) for (unsigned int k = 0; k<Mth.size(); ++k) h[k][j][i]->Write();
    for (unsigned int i = 0; i<h_names.size(); ++i) for (unsigned int j = 0; j<Mth.size(); ++j) for (unsigned int k = 0; k<dms.size(); ++k) for (unsigned int l = 0; l<eta.size(); ++l) for (unsigned int m = 0; m<taun.size(); ++m) hh[i][j][k][l][m]->Write();
    for (unsigned int i = 0; i<hgen.size(); ++i) hgen[i]->Write();
