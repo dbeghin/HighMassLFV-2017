@@ -27,10 +27,12 @@ int main(int argc, char** argv) {
   TTree* mmeta = (TTree*) fIn->Get("meta");
   meta* m = new meta(mmeta);
   Float_t nEvents = m->Loop(type);
+  //delete m;
 
   IIHEAnalysis* a = new IIHEAnalysis(tree);
   a->Loop(phase, type, out_name, mc_nickname, nEvents);
   fIn->Close();
+  //delete a;
   return 0;
 }
 
@@ -254,21 +256,35 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
    Mth.push_back("MtLow_OS");  int k_low_OS = Mth.size()-1;
    Mth.push_back("MtLow_SS");  int k_low_SS = Mth.size()-1;
    Mth.push_back("MtHigh");    int k_high   = Mth.size()-1;
+   Mth.push_back("MtLow_TT");  int k_low_TT= Mth.size()-1;
+   Mth.push_back("MtHigh_TT"); int k_high_TT= Mth.size()-1;
 
-   vector<TH1F*> h[Mth.size()][taun.size()];
+   //put all systematics here                                           
+   vector<TString> systs;                 map<TString, int> systs_map;                          vector<double> syst_weights;
+   systs.push_back("");                   systs_map[systs[systs.size()-1]] = systs.size()-1;    syst_weights.push_back(1);
+   systs.push_back("topreweight_up_");    systs_map[systs[systs.size()-1]] = systs.size()-1;    syst_weights.push_back(1);
+   systs.push_back("topreweight_down_");  systs_map[systs[systs.size()-1]] = systs.size()-1;    syst_weights.push_back(1);
+   if (CR_number == 101 || CR_number == 103) {
+     //up or down are arbitrary labels, the important thing is they go on different directions
+     systs.push_back("fakerate_up_");     systs_map[systs[systs.size()-1]] = systs.size()-1;    syst_weights.push_back(1);
+     systs.push_back("fakerate_down_");   systs_map[systs[systs.size()-1]] = systs.size()-1;    syst_weights.push_back(1);
+   }
+
+
+   vector<TH1F*> h[Mth.size()][systs.size()][taun.size()];
    for (unsigned int i = 0; i<histo_names.size(); ++i) {
      for (unsigned int j = 0; j<taun.size(); ++j) {
-       for (unsigned int k = 0; k<Mth.size(); ++k) {
-	 h[k][j].push_back( new TH1F(histo_names[i]+"_"+taun[j]+"_"+Mth[k], histo_names[i]+"_"+taun[j]+"_"+Mth[k], nBins[i], x_min[i], x_max[i]) ); 
-	 h[k][j][i]->Sumw2();
+       for (unsigned int l = 0; l<systs.size(); ++l) {
+	 for (unsigned int k = 0; k<Mth.size(); ++k) {
+	   h[k][l][j].push_back( new TH1F(histo_names[i]+"_"+taun[j]+"_"+systs[l]+Mth[k], histo_names[i]+"_"+taun[j]+"_"+systs[l]+Mth[k], nBins[i], x_min[i], x_max[i]) ); 
+	   h[k][l][j][i]->Sumw2();
+	 }
        }
      }
    }
 
 
    vector<TString> h_names;
-   //h_names.push_back("taupt_jetpt_pass"); int iJetPtPass = h_names.size()-1;
-   //h_names.push_back("taupt_jetpt_fail"); int iJetPtFail = h_names.size()-1;
    h_names.push_back("taupt_ratio_pass");  int iRatioPass  = h_names.size()-1;
    h_names.push_back("taupt_ratio_fail");  int iRatioFail  = h_names.size()-1;
 
@@ -281,7 +297,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
    eta.push_back("barrel"); int l_barrel = eta.size()-1;
    eta.push_back("endcap"); int l_endcap = eta.size()-1;
 
-   vector<TH2F*> hh[h_names.size()][Mth.size()][dms.size()][eta.size()];
+   vector<TH2D*> hh[h_names.size()][Mth.size()][dms.size()][eta.size()];
 
    for (unsigned int i = 0; i<h_names.size(); ++i) {
      for (unsigned int j = 0; j<Mth.size(); ++j) {
@@ -289,7 +305,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	 for (unsigned int l = 0; l<eta.size(); ++l) {
 	   for (unsigned int m = 0; m<taun.size(); ++m) {
 	     TString nname = h_names[i]+"_"+Mth[j]+"_"+dms[k]+"_"+eta[l]+"_"+taun[m];
-	     hh[i][j][k][l].push_back( new TH2F(nname, nname, 1000, 0, 1000, 1000, 0, 10) );
+	     hh[i][j][k][l].push_back( new TH2D(nname, nname, 1000, 0, 1000, 1000, 0, 10) );
 	     hh[i][j][k][l][m]->Sumw2();
 	   }
 	 }
@@ -427,18 +443,33 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
       //if (reject_event) continue;
       //FIXME when there are high mass samples
 
-      double TT_ptreweight = 1;
-      if (TT) {
-      	double w_top = 1, w_antitop = 1;
-        for (unsigned int iLHE = 0; iLHE < LHE_Pt->size(); ++iLHE) {
-      	  if (LHE_pdgid->at(iLHE) == 6) {
-      	    w_top = topPtReweight(LHE_Pt->at(iLHE));
-      	  }
-      	  else if (LHE_pdgid->at(iLHE) == -6) {
-      	    w_antitop = topPtReweight(LHE_Pt->at(iLHE));
-      	  }
-      	}
-      	TT_ptreweight = sqrt(w_top*w_antitop);
+      double TT_ptreweight = 1, w_top_up = 1, w_top_down = 1;
+      if(TT) {
+	bool find_t1 = false;
+	bool find_t2 = false;
+	TLorentzVector MC_p4_1(1,0,0,0);
+	TLorentzVector MC_p4_2(1,0,0,0);
+	for(unsigned iMC=0 ; iMC<LHE_Pt->size() ; ++iMC) {
+	  if( (LHE_pdgid->at(iMC) == 6) ) {
+	    MC_p4_1.SetPtEtaPhiE(LHE_Pt->at(iMC),LHE_Eta->at(iMC),LHE_Phi->at(iMC),LHE_E->at(iMC)) ;
+	    find_t1 = true;
+	  }
+	  else if( (LHE_pdgid->at(iMC) == -6) ) {
+	    MC_p4_2.SetPtEtaPhiE(LHE_Pt->at(iMC),LHE_Eta->at(iMC),LHE_Phi->at(iMC),LHE_E->at(iMC)) ;
+	    find_t2 = true;
+	  }
+	  if(find_t1 && find_t2) {
+	    float tmp_t1 = exp(0.0615-0.0005*MC_p4_1.Pt());
+	    float tmp_t2 = exp(0.0615-0.0005*MC_p4_2.Pt());
+	    float tmp_t1_uncer = top_reweighting_uncertainty(MC_p4_1.Pt());
+	    float tmp_t2_uncer = top_reweighting_uncertainty(MC_p4_2.Pt());
+
+	    w_top_up = sqrt(tmp_t1*(1.0 + tmp_t1_uncer)*tmp_t2*(1.0 + tmp_t2_uncer) );
+	    w_top_down = sqrt(tmp_t1*(1.0 - tmp_t1_uncer)*tmp_t2*(1.0 - tmp_t2_uncer) );
+	    TT_ptreweight = sqrt(tmp_t1 * tmp_t2);
+	    break;
+	  }
+	}
       }
 
       vector<TLorentzVector> tauhp4;
@@ -481,6 +512,54 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
       bool PassTrigger = false;
       if (trig_HLT_Mu50_accept || trig_HLT_OldMu100_accept || trig_HLT_TkMu100_accept) PassTrigger = true;
       if (!PassTrigger) continue;
+
+
+
+      //bjet pair finding (medium WP for the bjet)                                                                                                                           
+      //add SF when available
+      int nbjet = 0;
+      float bjetMedium2017 = 0.8838;
+      float bjet_weight;
+      for (unsigned int iJet = 0; iJet < jet_pt->size(); ++iJet) {
+	TLorentzVector bjet_p4;
+	if (jet_CSVv2->at(iJet) > bjetMedium2017 && jet_pt->at(iJet) > 30 && fabs(jet_eta->at(iJet)) < 2.4 && jet_isJetIDLoose->at(iJet)) {
+	  bjet_p4.SetPxPyPzE(jet_px->at(iJet), jet_py->at(iJet), jet_pz->at(iJet), jet_energy->at(iJet));
+
+	  //bjet should match neither a tau nor a muon
+	  bool btau = false;
+	  for (unsigned int iTau = 0; iTau < tau_pt->size(); ++iTau) {
+	    TLorentzVector tau_temp_p4;
+	    tau_temp_p4.SetPtEtaPhiE(tau_pt->at(iTau), tau_eta->at(iTau), tau_phi->at(iTau), tau_energy->at(iTau));
+	    if (tau_temp_p4.Pt() < 30.0) continue;
+	    if (fabs(tau_eta->at(iTau)) > 2.3) continue;
+	    if (tau_decayModeFinding->at(iTau) < 0.5) continue;
+	    if (tau_againstMuonTight3->at(iTau) < 0.5) continue;
+	    if (tau_againstElectronVLooseMVA6->at(iTau) < 0.5) continue;
+	    if (fabs(tau_charge->at(iTau)) != 1) continue;
+	    if (tau_byVVLooseIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) < 0.5) continue;
+	      
+	    if (bjet_p4.DeltaR(tau_temp_p4) < 0.5) btau = true;
+	    if (btau) break;
+	  }
+	  if (btau) continue;
+	    
+	  bool bmu = false;
+	  for (unsigned int iMu = 0; iMu < mu_ibt_pt->size(); ++iMu) {
+	    TLorentzVector mu_temp_p4;
+	    mu_temp_p4.SetPtEtaPhiM(mu_ibt_pt->at(iMu), mu_ibt_eta->at(iMu), mu_ibt_phi->at(iMu), mu_mass);
+	    if (mu_ibt_pt->at(iMu) < 53.0) continue;
+	    if (!mu_isHighPtcustomizedId->at(iMu)) continue;
+	    if (fabs(mu_ibt_eta->at(iMu)) > 2.4) continue;
+	    if (mu_isoTrackerBased03->at(iMu) > 0.1) continue;
+	      
+	    if (bjet_p4.DeltaR(mu_temp_p4) < 0.5) bmu = true;
+	    if (bmu) break;
+	  }
+	  if (bmu) continue;
+	  ++nbjet;
+	}
+	if (nbjet >= 2) break;
+      }
 
 
 
@@ -544,7 +623,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	if (filled_histos) break;//if we've filled the histos once, break out of the loop
 	int iMu = orderedMu[ii];
 	if (mu_ibt_pt->at(iMu) < 53.0) continue;
-	if (!mu_isHighPtMuon->at(iMu)) continue;
+	if (!mu_isHighPtcustomizedId->at(iMu)) continue;
 	if (fabs(mu_ibt_eta->at(iMu)) > 2.4) continue;
 
 
@@ -665,16 +744,20 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 
 
 	  int kMth = -1;
+	  bool isLowTTCR = false, isHighTTCR = false;
 	  if (Mt < 120) {
 	    if ( tau_charge->at(iTau)*mu_ibt_charge->at(iMu) < 0) {
 	      kMth = k_low_OS;
+	      if (nbjet >= 2) isLowTTCR = true;
 	    }
 	    else {
 	      kMth = k_low_SS;
+	      if (nbjet >= 2) isLowTTCR = true;
 	    }
 	  }
 	  else {
 	    kMth = k_high;
+	    if (nbjet >= 2) isHighTTCR = true;
 	  }
 
 	  double lepToTauFR = 1;
@@ -736,7 +819,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	    }
 	    if (CR_number >= 2) tau_match = false;
 	    float reweight = GetReweight_highmass(mu_p4.Pt(), mu_p4.Eta());
-	    h[kMth][jTauN][13]->Fill(reweight);
+	    h[kMth][0][jTauN][13]->Fill(reweight);
 	  }
 	  //FIXME
 	  first_weight = 1;
@@ -744,7 +827,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  final_weight = first_weight;
 
 	  if (CR_number == 7 || CR_number == 9) {
-	    h[kMth][jTauN][16]->Fill(Mt, final_weight);
+	    h[kMth][0][jTauN][16]->Fill(Mt, final_weight);
 	    if (Mt < 80 || Mt > 120) continue;
 	  }
 
@@ -838,8 +921,29 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  }
 
 
-	  //if ((CR_number == 101) || (CR_number == 103)) final_weight = first_weight*FakeRate_SSMtLow(tau_p4.Pt(), jet_p4.Pt(), eta_string);
-	  if ((CR_number == 101) || (CR_number == 103)) final_weight = first_weight*FakeRate_factorised(tau_p4.Pt(), jet_p4.Pt(), eta_string);
+
+	  double fake_weight = 1, fake_weight_high = 1, fake_weight_low = 1;
+	  if ((CR_number == 101) || (CR_number == 103)) {
+	    double ratio = 0;
+	    if (jet_p4.Pt() != 0) ratio = tau_p4.Pt()/jet_p4.Pt();
+	    //fake_weight = FakeRate_noratio(tau_p4.Pt(), eta_string); //FIXME
+	    fake_weight = FakeRate_unfactorised(tau_p4.Pt(), ratio, eta_string);
+	    //fake_weight = FakeRate_factorised(tau_p4.Pt(), ratio, eta_string);
+	    //fake_weight = FakeRate_SSMtLow(tau_p4.Pt(), jet_p4.Pt(), eta_string);
+	    fake_weight_high = FakeRate_SSMtLow(tau_p4.Pt(), jet_p4.Pt(), eta_string);//FakeRate_mumu(tau_p4.Pt(), jet_p4.Pt()); //FIXME
+	    fake_weight_low = 2*fake_weight - fake_weight_high;
+
+	    if (fake_weight != 0) {
+	      syst_weights[systs_map["fakerate_up_"]] = fake_weight_high/fake_weight;
+	      syst_weights[systs_map["fakerate_down_"]] = fake_weight_low/fake_weight;
+	    }
+	    else {
+	      syst_weights[systs_map["fakerate_up_"]] = 1;
+	      syst_weights[systs_map["fakerate_down_"]] = 1;
+	    }
+	  }
+	  syst_weights[systs_map["topreweight_up_"]] = w_top_up/TT_ptreweight;
+	  syst_weights[systs_map["topreweight_down_"]] = w_top_down/TT_ptreweight;
 
 
 	  //TH2's for the fake rate
@@ -867,6 +971,15 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  }
 
 	  if (dR < 0.5) continue;
+
+	  //electron veto
+	  bool electron = false;
+	  for (unsigned int iEle = 0; iEle < gsf_pt->size(); ++iEle) {
+	    if (gsf_isHeepV7->at(iEle) && gsf_pt->at(iEle) > 40) electron = true;
+	    if (electron) break;
+	  }
+	  if (electron) continue;
+
 	  if (CR_number == 100) {
 	    double ratio = 1;
 	    if (jet_p4.Pt() != 0) ratio = tau_p4.Pt()/jet_p4.Pt();
@@ -874,28 +987,51 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	    hh[iRatio][kMth][k_dm][l_eta][jTauN]->Fill(tau_p4.Pt(), ratio, final_weight);
 	    if (tau_byTightIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) < 0.5) continue;
 	  }
+	  filled_histos = true;
 
+	  cout << endl << TT_ptreweight << " " << first_weight << endl;
+	  for (unsigned int k_syst=0; k_syst<systs.size(); ++k_syst) {
+	    final_weight = first_weight*fake_weight*syst_weights[k_syst];
 
-	  h[kMth][jTauN][9]->Fill(dphi_mutau, final_weight);
-	  h[kMth][jTauN][10]->Fill(dphi_METtau, final_weight);
-	  
-	  h[kMth][jTauN][0]->Fill(vis_p4.M(), final_weight);
-	  h[kMth][jTauN][1]->Fill(total_p4.M(), final_weight);
-	  h[kMth][jTauN][2]->Fill(tau_p4.Pt(), final_weight);
-	  h[kMth][jTauN][3]->Fill(tau_p4.Eta(), final_weight);
-	  h[kMth][jTauN][4]->Fill(tau_p4.Phi(), final_weight);
-	  h[kMth][jTauN][5]->Fill(mu_p4.Pt(), final_weight);
-	  h[kMth][jTauN][6]->Fill(mu_p4.Eta(), final_weight);
-	  h[kMth][jTauN][7]->Fill(mu_p4.Phi(), final_weight);
-	  h[kMth][jTauN][8]->Fill(dR, final_weight);
-	  h[kMth][jTauN][11]->Fill(met_p4.Pt(), final_weight);
-	  //h[kMth][jTauN][12]->Fill(mc_w_sign);
-	  h[kMth][jTauN][13]->Fill(met_p4.Px()-met_px, final_weight);
-	  h[kMth][jTauN][14]->Fill(Mcol, final_weight);
-	  h[kMth][jTauN][15]->Fill(Mt, final_weight);
-	  h[kMth][jTauN][16]->Fill(reliso, final_weight);
-	  //h[kMth][jTauN][11]->Fill(Mt, final_weight);
-	  //if (cut_zeta < -25) continue;
+	    bool stopFilling = false;
+	    int k_value = kMth;
+	    int n_fuel = 0;
+	    while (!stopFilling && n_fuel<2) {
+	      h[k_value][k_syst][jTauN][9]->Fill(dphi_mutau, final_weight);
+	      h[k_value][k_syst][jTauN][10]->Fill(dphi_METtau, final_weight);
+
+	      h[k_value][k_syst][jTauN][0]->Fill(vis_p4.M(), final_weight);
+	      h[k_value][k_syst][jTauN][1]->Fill(total_p4.M(), final_weight);
+	      h[k_value][k_syst][jTauN][2]->Fill(tau_p4.Pt(), final_weight);
+	      h[k_value][k_syst][jTauN][3]->Fill(tau_p4.Eta(), final_weight);
+	      h[k_value][k_syst][jTauN][4]->Fill(tau_p4.Phi(), final_weight);
+	      h[k_value][k_syst][jTauN][5]->Fill(mu_p4.Pt(), final_weight);
+	      h[k_value][k_syst][jTauN][6]->Fill(mu_p4.Eta(), final_weight);
+	      h[k_value][k_syst][jTauN][7]->Fill(mu_p4.Phi(), final_weight);
+	      h[k_value][k_syst][jTauN][8]->Fill(dR, final_weight);
+	      h[k_value][k_syst][jTauN][11]->Fill(met_p4.Pt(), final_weight);
+	      //h[k_value][k_syst][jTauN][12]->Fill(mc_w_sign);
+	      h[k_value][k_syst][jTauN][13]->Fill(met_p4.Px()-met_px, final_weight);
+	      h[k_value][k_syst][jTauN][14]->Fill(Mcol, final_weight);
+	      h[k_value][k_syst][jTauN][15]->Fill(Mt, final_weight);
+	      h[k_value][k_syst][jTauN][16]->Fill(reliso, final_weight);
+	      //h[k_value][k_syst][jTauN][11]->Fill(Mt, final_weight);
+	      //if (cut_zeta < -25) continue;
+	      if (k_value == k_high_TT || k_value == k_low_TT) stopFilling = true;
+	      if (k_value == kMth) {
+		if (isHighTTCR) {
+		  k_value = k_high_TT;
+		}
+		else if (isLowTTCR) {
+		  k_value = k_low_TT;
+		} 
+		else {
+		  stopFilling = true;
+		}
+	      }
+
+	    }
+	  }
 
 	}//loop over taus
       }//loop over muons
@@ -906,7 +1042,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
    h_total_events->Fill(0.5, nEvents);
    file_out->cd();
    h_total_events->Write();
-   for (unsigned int i = 0; i<histo_names.size(); ++i) for (unsigned int j = 0; j<taun.size(); ++j) for (unsigned int k = 0; k<Mth.size(); ++k) h[k][j][i]->Write();
+   for (unsigned int i = 0; i<histo_names.size(); ++i) for (unsigned int j = 0; j<taun.size(); ++j) for (unsigned int l = 0; l<systs.size(); ++l) for (unsigned int k = 0; k<Mth.size(); ++k) h[k][l][j][i]->Write();
    for (unsigned int i = 0; i<h_names.size(); ++i) for (unsigned int j = 0; j<Mth.size(); ++j) for (unsigned int k = 0; k<dms.size(); ++k) for (unsigned int l = 0; l<eta.size(); ++l) for (unsigned int m = 0; m<taun.size(); ++m) hh[i][j][k][l][m]->Write();
    for (unsigned int i = 0; i<hgen.size(); ++i) hgen[i]->Write();
    file_out->Close();

@@ -20,6 +20,91 @@ float norm_F(float x, float y){
 }
 
 
+
+float top_reweighting_uncertainty(float top_pt_in){
+  float weight = 0.0;
+  if (top_pt_in < 0.0) {
+    weight = 0.0;
+  } else if (top_pt_in < 150.0) {
+    weight = 0.045;
+  } else if (top_pt_in < 1000.0) {
+    weight = 0.04 * top_pt_in/1000.0 + 0.045;
+  } else if (top_pt_in < 1100.0) {
+    weight = 0.09;
+  } else if (top_pt_in < 1200.0) {
+    weight = 0.1;
+  } else if (top_pt_in < 1400.0) {
+    weight = 0.12;
+  } else if (top_pt_in < 1600.0) {
+    weight = 0.14;
+  } else if (top_pt_in < 1800.0) {
+    weight = 0.155;
+  } else if (top_pt_in < 2000.0) {
+    weight = 0.18;
+  } else if (top_pt_in < 2200.0) {
+    weight = 0.2;
+  } else if (top_pt_in < 2600.0) {
+    weight = 0.243;
+  } else if (top_pt_in < 3000.0) {
+    weight = 0.34;
+  } else if (top_pt_in > 2999.9) {
+    weight = 0.34;
+  }
+  return weight;
+}
+
+
+
+double FakeRate_noratio(double taupt, TString eta) {
+  double SF=0.2;
+  if (taupt >= 1000) taupt = 999;
+
+  TFile* fake_file = new TFile("Reweighting/fakerate_MtLow.root","R");
+
+  double reweight = 0;
+
+  TString hname = "eta_"+eta;
+  TH1F* h_taupt = (TH1F*) fake_file->Get("FakeRateByTauPt_"+hname);
+  int iBin = h_taupt->FindBin(taupt);
+  double base_SF = h_taupt->GetBinContent(iBin);
+  
+  SF = base_SF;
+  reweight = SF;
+
+  return reweight;
+}
+
+
+
+double FakeRate_unfactorised(double taupt, double ratio, TString eta) {
+  double SF=0.2;
+  if (taupt >= 1000) taupt = 999;
+  if (ratio >= 2) ratio = 1.9;
+
+  TFile* fake_file = new TFile("Reweighting/fakerate_unfactorised_MtLow.root","R");
+
+  double reweight = 0;
+
+  TString hname = "eta_"+eta;
+  if (taupt > 150) {
+    hname += "_taupt_150_1000";
+  }
+  else {
+    hname += "_taupt_0_150";
+  }
+
+  TH1F* h_taupt = (TH1F*) fake_file->Get("FakeRateByTauPtAndRatio_"+hname);
+  int iBin = h_taupt->FindBin(taupt, ratio);
+  double base_SF = h_taupt->GetBinContent(iBin);
+  
+  SF = base_SF;
+  reweight = SF;
+
+  return reweight;
+}
+
+
+
 double FakeRate_factorised(double taupt, double ratio, TString eta) {
   double SF=0.2;
   if (taupt >= 1000) taupt = 999;
