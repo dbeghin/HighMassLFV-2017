@@ -75,6 +75,20 @@ Float_t meta::Loop(string type_of_data) {
 void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_name, string mc_nickname, Float_t nEvents) {
    if (fChain == 0) return;
 
+   BTagCalibration calib("DeepCSV", "Reweighting/DeepCSV_94XSF_V4_B_F.csv");
+   BTagCalibrationReader reader(BTagEntry::OP_MEDIUM,  // operating point
+				"central",             // central sys type
+				{"up", "down"});      // other sys types
+   reader.load(calib,                // calibration instance
+	       BTagEntry::FLAV_B,    // btag flavour
+	       "comb") ;              // measurement type
+   reader.load(calib,                // calibration instance
+	       BTagEntry::FLAV_C,    // btag flavour
+	       "comb") ;              // measurement type
+   reader.load(calib,                // calibration instance
+	       BTagEntry::FLAV_UDSG,  // btag flavour
+	       "incl") ;              // measurement type
+
 
    bool Signal, data, singlephoton, singlemu, DYinc, WJetsinc, TTinc, WWinc, TT;
    if (type_of_data == "Signal" || type_of_data == "signal") {
@@ -247,6 +261,10 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
    histo_names.push_back("ev_Mcol");          nBins.push_back(4000); x_min.push_back(0);    x_max.push_back(4000);
    histo_names.push_back("ev_Mt");            nBins.push_back(4000); x_min.push_back(0);    x_max.push_back(4000);
    histo_names.push_back("mu_isolation");     nBins.push_back(200);  x_min.push_back(0);    x_max.push_back(0.2);
+   histo_names.push_back("sign");             nBins.push_back(5);    x_min.push_back(0);    x_max.push_back(5);
+   int OS_number = 1;
+   int SS_number = 3;
+
 
    vector<TString> taun;
    taun.push_back("realtau"); int j_real = taun.size()-1;
@@ -514,15 +532,14 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
       if (!PassTrigger) continue;
 
 
-
       //bjet pair finding (medium WP for the bjet)                                                                                                                           
       //add SF when available
       int nbjet = 0;
-      float bjetMedium2017 = 0.8838;
+      float bjetMedium2017 = 0.4941;
       float bjet_weight;
       for (unsigned int iJet = 0; iJet < jet_pt->size(); ++iJet) {
 	TLorentzVector bjet_p4;
-	if (jet_CSVv2->at(iJet) > bjetMedium2017 && jet_pt->at(iJet) > 30 && fabs(jet_eta->at(iJet)) < 2.4 && jet_isJetIDLoose->at(iJet)) {
+	if (jet_DeepCSV->at(iJet) > bjetMedium2017 && jet_pt->at(iJet) > 30 && fabs(jet_eta->at(iJet)) < 2.4 && jet_isJetIDLoose->at(iJet)) {
 	  bjet_p4.SetPxPyPzE(jet_px->at(iJet), jet_py->at(iJet), jet_pz->at(iJet), jet_energy->at(iJet));
 
 	  //bjet should match neither a tau nor a muon
@@ -556,6 +573,37 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	    if (bmu) break;
 	  }
 	  if (bmu) continue;
+	  double jet_scalefactor = 1;
+	  if (!data) {
+	    if (fabs(jet_partonFlavour->at(iJet)) == 5) {
+	      jet_scalefactor = reader.eval_auto_bounds(
+							"central",
+							BTagEntry::FLAV_B,
+							fabs(bjet_p4.Eta()), // absolute value of eta
+							bjet_p4.Pt()
+							);
+	    }
+	    else if (fabs(jet_partonFlavour->at(iJet)) == 4) {
+	      jet_scalefactor = reader.eval_auto_bounds(
+							"central",
+							BTagEntry::FLAV_C,
+							fabs(bjet_p4.Eta()), // absolute value of eta
+							bjet_p4.Pt()
+							);
+	    }
+	    else {
+	      jet_scalefactor = reader.eval_auto_bounds(
+							"central",
+							BTagEntry::FLAV_UDSG,
+							fabs(bjet_p4.Eta()), // absolute value of eta
+							bjet_p4.Pt()
+							);
+	    }
+
+	    cout<<"jet_scalefactor:"<<jet_scalefactor<<endl;
+	    if (jet_scalefactor == 0) jet_scalefactor = 1;
+	    bjet_weight *= jet_scalefactor;
+	  }
 	  ++nbjet;
 	}
 	if (nbjet >= 2) break;
@@ -745,19 +793,28 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 
 	  int kMth = -1;
 	  bool isLowTTCR = false, isHighTTCR = false;
+	  int sign_number = -1;
 	  if (Mt < 120) {
 	    if ( tau_charge->at(iTau)*mu_ibt_charge->at(iMu) < 0) {
 	      kMth = k_low_OS;
 	      if (nbjet >= 2) isLowTTCR = true;
+	      sign_number = OS_number;
 	    }
 	    else {
 	      kMth = k_low_SS;
 	      if (nbjet >= 2) isLowTTCR = true;
+	      sign_number = SS_number;
 	    }
 	  }
 	  else {
 	    kMth = k_high;
 	    if (nbjet >= 2) isHighTTCR = true;
+	    if ( tau_charge->at(iTau)*mu_ibt_charge->at(iMu) < 0) {
+	      sign_number = OS_number;
+	    }
+	    else {
+	      sign_number = SS_number;
+	    }
 	  }
 
 	  double lepToTauFR = 1;
@@ -1015,15 +1072,18 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	      h[k_value][k_syst][jTauN][14]->Fill(Mcol, final_weight);
 	      h[k_value][k_syst][jTauN][15]->Fill(Mt, final_weight);
 	      h[k_value][k_syst][jTauN][16]->Fill(reliso, final_weight);
+	      h[k_value][k_syst][jTauN][17]->Fill(sign_number, final_weight);
 	      //h[k_value][k_syst][jTauN][11]->Fill(Mt, final_weight);
 	      //if (cut_zeta < -25) continue;
 	      if (k_value == k_high_TT || k_value == k_low_TT) stopFilling = true;
 	      if (k_value == kMth) {
 		if (isHighTTCR) {
 		  k_value = k_high_TT;
+		  final_weight *= bjet_weight;
 		}
 		else if (isLowTTCR) {
 		  k_value = k_low_TT;
+		  final_weight *= bjet_weight;
 		} 
 		else {
 		  stopFilling = true;

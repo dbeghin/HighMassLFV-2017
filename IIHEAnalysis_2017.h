@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Dec 19 14:26:03 2018 by ROOT version 6.12/07
+// Tue Mar 26 14:47:06 2019 by ROOT version 6.12/07
 // from TTree IIHEAnalysis/IIHEAnalysis
-// found on file: outfile_109.root
+// found on file: /pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018_v2/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5/190214_072038/0000/outfile_122.root
 //////////////////////////////////////////////////////////
 
 #ifndef IIHEAnalysis_h
@@ -20,6 +20,8 @@
 #include <iostream>
 #include "TString.h"
 #include "TLorentzVector.h"
+#include "BTagCalibrationStandalone.cc"
+#include "BTagCalibrationStandalone.h"
 
 
 using namespace std;
@@ -521,6 +523,10 @@ public :
    vector<float>   *jet_CvsL;
    vector<float>   *jet_CvsB;
    vector<float>   *jet_MVA2BJets;
+   vector<float>   *jet_DeepCSV;
+   vector<float>   *jet_DeepJet;
+   vector<float>   *jet_CvsB_DeepCSV_charm_tagger;
+   vector<float>   *jet_CvsL_DeepCSV_charm_tagger;
    vector<int>     *jet_isJetIDLoose;
    vector<int>     *jet_isJetIDTight;
    vector<int>     *jet_isJetIDTightLepVeto;
@@ -1977,6 +1983,10 @@ public :
    TBranch        *b_jet_CvsL;   //!
    TBranch        *b_jet_CvsB;   //!
    TBranch        *b_jet_MVA2BJets;   //!
+   TBranch        *b_jet_DeepCSV;   //!
+   TBranch        *b_jet_DeepJet;   //!
+   TBranch        *b_jet_CvsB_DeepCSV_charm_tagger;   //!
+   TBranch        *b_jet_CvsL_DeepCSV_charm_tagger;   //!
    TBranch        *b_jet_isJetIDLoose;   //!
    TBranch        *b_jet_isJetIDTight;   //!
    TBranch        *b_jet_isJetIDTightLepVeto;   //!
@@ -2962,9 +2972,9 @@ IIHEAnalysis::IIHEAnalysis(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("outfile_109.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018_v2/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5/190214_072038/0000/outfile_122.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("outfile_109.root");
+         f = new TFile("/pnfs/iihe/cms/store/user/amkalsi/2017_MET_Corrected_10Dec2018_v2/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_TuneCP5/190214_072038/0000/outfile_122.root");
       }
       f->GetObject("IIHEAnalysis",tree);
 
@@ -3467,6 +3477,10 @@ void IIHEAnalysis::Init(TTree *tree)
    jet_CvsL = 0;
    jet_CvsB = 0;
    jet_MVA2BJets = 0;
+   jet_DeepCSV = 0;
+   jet_DeepJet = 0;
+   jet_CvsB_DeepCSV_charm_tagger = 0;
+   jet_CvsL_DeepCSV_charm_tagger = 0;
    jet_isJetIDLoose = 0;
    jet_isJetIDTight = 0;
    jet_isJetIDTightLepVeto = 0;
@@ -4567,6 +4581,10 @@ void IIHEAnalysis::Init(TTree *tree)
    fChain->SetBranchAddress("jet_CvsL", &jet_CvsL, &b_jet_CvsL);
    fChain->SetBranchAddress("jet_CvsB", &jet_CvsB, &b_jet_CvsB);
    fChain->SetBranchAddress("jet_MVA2BJets", &jet_MVA2BJets, &b_jet_MVA2BJets);
+   fChain->SetBranchAddress("jet_DeepCSV", &jet_DeepCSV, &b_jet_DeepCSV);
+   fChain->SetBranchAddress("jet_DeepJet", &jet_DeepJet, &b_jet_DeepJet);
+   fChain->SetBranchAddress("jet_CvsB_DeepCSV_charm_tagger", &jet_CvsB_DeepCSV_charm_tagger, &b_jet_CvsB_DeepCSV_charm_tagger);
+   fChain->SetBranchAddress("jet_CvsL_DeepCSV_charm_tagger", &jet_CvsL_DeepCSV_charm_tagger, &b_jet_CvsL_DeepCSV_charm_tagger);
    fChain->SetBranchAddress("jet_isJetIDLoose", &jet_isJetIDLoose, &b_jet_isJetIDLoose);
    fChain->SetBranchAddress("jet_isJetIDTight", &jet_isJetIDTight, &b_jet_isJetIDTight);
    fChain->SetBranchAddress("jet_isJetIDTightLepVeto", &jet_isJetIDTightLepVeto, &b_jet_isJetIDTightLepVeto);
