@@ -21,8 +21,14 @@ int main(/*int argc, char** argv*/) {
   vector<TString> names;
   names.push_back("data_");//0
   names.push_back("faketau_");
+  names.push_back("faketau_fakerate_up_");
+  names.push_back("faketau_fakerate_down_");
+  names.push_back("faketau_topreweight_up_");
+  names.push_back("faketau_topreweight_down_");
   names.push_back("DY_");
   names.push_back("TT_");
+  names.push_back("TT_topreweight_up_");
+  names.push_back("TT_topreweight_down_");
   //names.push_back("ST_");
   names.push_back("VV_");
   //names.push_back("Signal_");//FIXME
@@ -46,7 +52,7 @@ int main(/*int argc, char** argv*/) {
   vars.push_back("ev_Mvis");                simpleRebin.push_back(false);     rebin.push_back(1);     rebin_vector.push_back(xpoints);
   vars.push_back("ev_Mtot");		    simpleRebin.push_back(false);     rebin.push_back(1);     rebin_vector.push_back(xpoints);
   vars.push_back("tau_pt");		    simpleRebin.push_back(false);     rebin.push_back(1);     rebin_vector.push_back(xpoints_pt);
-  vars.push_back("tau_eta");		    simpleRebin.push_back(true);      rebin.push_back(2);     rebin_vector.push_back(xpoints);
+  vars.push_back("tau_eta");		    simpleRebin.push_back(true);      rebin.push_back(1);     rebin_vector.push_back(xpoints);
   vars.push_back("tau_phi");		    simpleRebin.push_back(true);      rebin.push_back(2);     rebin_vector.push_back(xpoints);
   vars.push_back("mu_pt");		    simpleRebin.push_back(false);     rebin.push_back(1);     rebin_vector.push_back(xpoints_pt);
   vars.push_back("mu_eta");		    simpleRebin.push_back(true);      rebin.push_back(2);     rebin_vector.push_back(xpoints);
@@ -58,11 +64,14 @@ int main(/*int argc, char** argv*/) {
   vars.push_back("ev_MET");		    simpleRebin.push_back(false);     rebin.push_back(1);     rebin_vector.push_back(xpoints_MET);
   vars.push_back("ev_Mcol");                simpleRebin.push_back(false);     rebin.push_back(1);     rebin_vector.push_back(xpoints);                
   vars.push_back("ev_Mt");                  simpleRebin.push_back(false);     rebin.push_back(1);     rebin_vector.push_back(xpoints_Mt);                
+  vars.push_back("sign");                   simpleRebin.push_back(true);      rebin.push_back(1);     rebin_vector.push_back(xpoints);                
 
   vector<TString> Mth;
   Mth.push_back("_MtHigh");
+  Mth.push_back("_MtHigh_TT");
   Mth.push_back("_MtLow_OS");
   Mth.push_back("_MtLow_SS");
+  Mth.push_back("_MtLow_TT");
 
 
   //retrieve all histos and rebin them

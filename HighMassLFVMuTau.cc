@@ -531,12 +531,20 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
       if (trig_HLT_Mu50_accept || trig_HLT_OldMu100_accept || trig_HLT_TkMu100_accept) PassTrigger = true;
       if (!PassTrigger) continue;
 
+      if(!trig_Flag_goodVertices_accept) continue;
+      if(!trig_Flag_globalSuperTightHalo2016Filter_accept) continue;
+      if(!trig_Flag_HBHENoiseFilter_accept) continue;
+      if(!trig_Flag_HBHENoiseIsoFilter_accept) continue;
+      if(!trig_Flag_EcalDeadCellTriggerPrimitiveFilter_accept) continue;
+      if(!trig_Flag_BadPFMuonFilter_accept) continue;
+      //FIXME: add Ecal bad calibration when it's available
+
 
       //bjet pair finding (medium WP for the bjet)                                                                                                                           
       //add SF when available
       int nbjet = 0;
       float bjetMedium2017 = 0.4941;
-      float bjet_weight;
+      float bjet_weight = 1;
       for (unsigned int iJet = 0; iJet < jet_pt->size(); ++iJet) {
 	TLorentzVector bjet_p4;
 	if (jet_DeepCSV->at(iJet) > bjetMedium2017 && jet_pt->at(iJet) > 30 && fabs(jet_eta->at(iJet)) < 2.4 && jet_isJetIDLoose->at(iJet)) {
@@ -603,6 +611,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	    cout<<"jet_scalefactor:"<<jet_scalefactor<<endl;
 	    if (jet_scalefactor == 0) jet_scalefactor = 1;
 	    bjet_weight *= jet_scalefactor;
+
 	  }
 	  ++nbjet;
 	}
@@ -664,6 +673,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
       }
 
 
+      cout << "2" << endl;
 
       //start loop over reconstructed muons
       bool filled_histos = false;
@@ -1054,6 +1064,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	    int k_value = kMth;
 	    int n_fuel = 0;
 	    while (!stopFilling && n_fuel<2) {
+	      ++n_fuel;
 	      h[k_value][k_syst][jTauN][9]->Fill(dphi_mutau, final_weight);
 	      h[k_value][k_syst][jTauN][10]->Fill(dphi_METtau, final_weight);
 

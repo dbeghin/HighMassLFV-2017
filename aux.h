@@ -268,16 +268,32 @@ pair<double,double> getSF (float mupt, float mueta) {
 }
 
 
+double threeTriggersSF(float mu_eta) {
+  double SF = 1;
+  if (mu_eta > -2.4 && mu_eta < -2.1) SF = 0.911;
+  else if (mu_eta < -1.6) SF = 0.968;
+  else if (mu_eta < -1.2) SF = 0.993;
+  else if (mu_eta < -0.9) SF = 0.948;
+  else if (mu_eta < -0.3) SF = 0.977;
+  else if (mu_eta < -0.2) SF = 0.941;
+  else if (mu_eta < 0.0)  SF = 0.978;
+  else if (mu_eta < 0.2)  SF = 0.975;
+  else if (mu_eta < 0.3)  SF = 0.948;
+  else if (mu_eta < 0.9)  SF = 0.970;
+  else if (mu_eta < 1.2)  SF = 0.942;
+  else if (mu_eta < 1.6)  SF = 0.982;
+  else if (mu_eta < 2.1)  SF = 0.968;
+  else if (mu_eta < 2.4)  SF = 0.921;
+
+  return SF;
+}
+
+
 double GetReweight_highmass(float mu_pt, float mu_eta) {
   //highest pt for trigger is 1200 GeV
   if (mu_pt >= 1200) mu_pt = 1199;
-  //scale factor files that need to be open
-  TFile* tr_file = new TFile("Reweighting/EfficienciesAndSF_RunBtoF_Nov17Nov2017.root","R");
-  TH2F* tr_histo = (TH2F*) tr_file->Get("Mu50_PtEtaBins/pt_abseta_ratio");
-  int bin_in = tr_histo->FindBin(mu_pt, fabs(mu_eta));
-  double tr_sf = tr_histo->GetBinContent(bin_in);
-  tr_file->Close();
-  if (tr_sf == 0) tr_sf = 1.0;
+  double tr_sf = 1;
+  tr_sf = threeTriggersSF(mu_eta);
 
   float muID_sf = getSF(mu_pt, mu_eta).first, muIso_sf = getSF(mu_pt, mu_eta).second;
 

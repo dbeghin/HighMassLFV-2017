@@ -55,22 +55,35 @@ int main(int argc, char** argv) {
   vars.push_back("ev_Mt");
   vars.push_back("ev_MET");
   vars.push_back("ev_Mcol");
+  vars.push_back("sign");
 
   
   vector<TString> Mth;
   Mth.push_back("MtLow_OS");
   Mth.push_back("MtLow_SS");
+  Mth.push_back("MtLow_TT");
   Mth.push_back("MtHigh");
+  Mth.push_back("MtHigh_TT");
+
+  
+  vector<TString> systs;
+  systs.push_back("");
+  systs.push_back("topreweight_up_");
+  systs.push_back("topreweight_down_");
+  systs.push_back("fakerate_up_");
+  systs.push_back("fakerate_down_");
+
 
 
   //retrieve histograms from all control regions
-  //only for CR4 (1) do we care to have all histos
-  vector<TH1F*> h[names.size()][vars.size()];
+  vector<TH1F*> h[names.size()][vars.size()][Mth.size()];
   for (unsigned int j=0; j<names.size(); ++j) {
     for (unsigned int k=0; k<vars.size(); ++k) {
       for (unsigned int l=0; l<Mth.size(); ++l) {
-	h[j][k].push_back( (TH1F*) file_in->Get(names[j]+vars[k]+"_realtau_"+Mth[l]) );
-	h[j][k][l]->SetName(names[j]+vars[k]+"_"+Mth[l]);
+	for (unsigned int m=0; m<systs.size(); ++m) {
+	  h[j][k][l].push_back( (TH1F*) file_in->Get(names[j]+vars[k]+"_realtau_"+systs[m]+Mth[l]) );
+	  h[j][k][l][m]->SetName(names[j]+vars[k]+"_"+systs[m]+Mth[l]);
+	}
       }
     }
   }
@@ -79,13 +92,15 @@ int main(int argc, char** argv) {
   file_out->cd();
   for (unsigned int k=0; k<vars.size(); ++k) {
     for (unsigned int l=0; l<Mth.size(); ++l) {
-      TH1F* h_faketau = (TH1F*) h[0][k][l]->Clone("faketau_"+vars[k]+"_"+Mth[l]);
-      for (unsigned int j=1; j<names.size(); ++j) h_faketau->Add(h[j][k][l], -1);//subtract all real tau bg
-
-      for (unsigned int iBin = 0; iBin<h_faketau->GetNbinsX(); ++iBin) {
-	if (h_faketau->GetBinContent(iBin) < 0) h_faketau->SetBinContent(iBin,0);
+      for (unsigned int m=0; m<systs.size(); ++m) {
+	TH1F* h_faketau = (TH1F*) h[0][k][l][m]->Clone("faketau_"+systs[m]+vars[k]+"_"+Mth[l]);
+	for (unsigned int j=1; j<names.size(); ++j) h_faketau->Add(h[j][k][l][m], -1);//subtract all real tau bg
+	
+	for (unsigned int iBin = 0; iBin<h_faketau->GetNbinsX(); ++iBin) {
+	  if (h_faketau->GetBinContent(iBin) < 0) h_faketau->SetBinContent(iBin,0);
+	}
+	h_faketau->Write();
       }
-      h_faketau->Write();
     }
   }
   file_out->Close();
