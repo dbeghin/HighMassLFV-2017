@@ -119,8 +119,10 @@ def make_plot(var_out, Data, DY, TT, VV, Faketau, Faketau_DY_high, Faketau_norm_
     h5.Add(TT_topreweight_high)
     h5.Add(Faketau, -1)
     h5.Add(TT, -1)
+    h6=Faketau_norm_high.Clone()
+    h6.Add(Faketau, -1)
     for iii in range(1, h4.GetNbinsX()+1):
-        bin_error = pow(pow(h4.GetBinContent(iii),2) + pow(errorBand.GetBinError(iii),2) + pow(h5.GetBinContent(iii),2), 0.5)
+        bin_error = pow(pow(h4.GetBinContent(iii),2) + pow(errorBand.GetBinError(iii),2) + pow(h5.GetBinContent(iii),2), 0.5) + pow(h6.GetBinContent(iii),2), 0.5)
         errorBand.SetBinError(iii, bin_error)
 
     
