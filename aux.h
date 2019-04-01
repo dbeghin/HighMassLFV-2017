@@ -20,6 +20,117 @@ float norm_F(float x, float y){
 }
 
 
+
+float top_reweighting_uncertainty(float top_pt_in){
+  float weight = 0.0;
+  if (top_pt_in < 0.0) {
+    weight = 0.0;
+  } else if (top_pt_in < 150.0) {
+    weight = 0.045;
+  } else if (top_pt_in < 1000.0) {
+    weight = 0.04 * top_pt_in/1000.0 + 0.045;
+  } else if (top_pt_in < 1100.0) {
+    weight = 0.09;
+  } else if (top_pt_in < 1200.0) {
+    weight = 0.1;
+  } else if (top_pt_in < 1400.0) {
+    weight = 0.12;
+  } else if (top_pt_in < 1600.0) {
+    weight = 0.14;
+  } else if (top_pt_in < 1800.0) {
+    weight = 0.155;
+  } else if (top_pt_in < 2000.0) {
+    weight = 0.18;
+  } else if (top_pt_in < 2200.0) {
+    weight = 0.2;
+  } else if (top_pt_in < 2600.0) {
+    weight = 0.243;
+  } else if (top_pt_in < 3000.0) {
+    weight = 0.34;
+  } else if (top_pt_in > 2999.9) {
+    weight = 0.34;
+  }
+  return weight;
+}
+
+
+
+double FakeRate_noratio(double taupt, TString eta) {
+  double SF=0.2;
+  if (taupt >= 1000) taupt = 999;
+
+  TFile* fake_file = new TFile("Reweighting/fakerate_MtLow.root","R");
+
+  double reweight = 0;
+
+  TString hname = "eta_"+eta;
+  TH1F* h_taupt = (TH1F*) fake_file->Get("FakeRateByTauPt_"+hname);
+  int iBin = h_taupt->FindBin(taupt);
+  double base_SF = h_taupt->GetBinContent(iBin);
+  
+  SF = base_SF;
+  reweight = SF;
+
+  return reweight;
+}
+
+
+
+double FakeRate_unfactorised(double taupt, double ratio, TString eta) {
+  double SF=0.2;
+  if (taupt >= 1000) taupt = 999;
+  if (ratio >= 2) ratio = 1.9;
+
+  TFile* fake_file = new TFile("Reweighting/fakerate_unfactorised_MtLow.root","R");
+
+  double reweight = 0;
+
+  TString hname = "eta_"+eta;
+  if (taupt > 150) {
+    hname += "_taupt_150_1000";
+  }
+  else {
+    hname += "_taupt_0_150";
+  }
+
+  TH1F* h_taupt = (TH1F*) fake_file->Get("FakeRateByTauPtAndRatio_"+hname);
+  int iBin = h_taupt->FindBin(taupt, ratio);
+  double base_SF = h_taupt->GetBinContent(iBin);
+  
+  SF = base_SF;
+  reweight = SF;
+
+  return reweight;
+}
+
+
+
+double FakeRate_factorised(double taupt, double ratio, TString eta) {
+  double SF=0.2;
+  if (taupt >= 1000) taupt = 999;
+  if (ratio >= 2) ratio = 1.9;
+
+  TFile* fake_file = new TFile("Reweighting/fakerate_MtLow.root","R");
+
+  double reweight = 0;
+
+  TString hname = "eta_"+eta;
+  TH1F* h_taupt = (TH1F*) fake_file->Get("FakeRateByTauPt_"+hname);
+  int iBin = h_taupt->FindBin(taupt);
+  double base_SF = h_taupt->GetBinContent(iBin);
+
+  TH1F* h_corr = (TH1F*) fake_file->Get("RatioCorrectionFactor_"+hname);
+  iBin = h_corr->FindBin(ratio);
+  double corr_factor = h_corr->GetBinContent(iBin);
+
+  SF = corr_factor*base_SF;
+  reweight = SF;
+
+  return reweight;
+}
+
+
+
 double topPtReweight(double pt) {
   double aa = 1.08872;
   double bb = 0.0119998;
@@ -157,16 +268,32 @@ pair<double,double> getSF (float mupt, float mueta) {
 }
 
 
+double threeTriggersSF(float mu_eta) {
+  double SF = 1;
+  if (mu_eta > -2.4 && mu_eta < -2.1) SF = 0.911;
+  else if (mu_eta < -1.6) SF = 0.968;
+  else if (mu_eta < -1.2) SF = 0.993;
+  else if (mu_eta < -0.9) SF = 0.948;
+  else if (mu_eta < -0.3) SF = 0.977;
+  else if (mu_eta < -0.2) SF = 0.941;
+  else if (mu_eta < 0.0)  SF = 0.978;
+  else if (mu_eta < 0.2)  SF = 0.975;
+  else if (mu_eta < 0.3)  SF = 0.948;
+  else if (mu_eta < 0.9)  SF = 0.970;
+  else if (mu_eta < 1.2)  SF = 0.942;
+  else if (mu_eta < 1.6)  SF = 0.982;
+  else if (mu_eta < 2.1)  SF = 0.968;
+  else if (mu_eta < 2.4)  SF = 0.921;
+
+  return SF;
+}
+
+
 double GetReweight_highmass(float mu_pt, float mu_eta) {
   //highest pt for trigger is 1200 GeV
   if (mu_pt >= 1200) mu_pt = 1199;
-  //scale factor files that need to be open
-  TFile* tr_file = new TFile("Reweighting/EfficienciesAndSF_RunBtoF_Nov17Nov2017.root","R");
-  TH2F* tr_histo = (TH2F*) tr_file->Get("Mu50_PtEtaBins/pt_abseta_ratio");
-  int bin_in = tr_histo->FindBin(mu_pt, fabs(mu_eta));
-  double tr_sf = tr_histo->GetBinContent(bin_in);
-  tr_file->Close();
-  if (tr_sf == 0) tr_sf = 1.0;
+  double tr_sf = 1;
+  tr_sf = threeTriggersSF(mu_eta);
 
   float muID_sf = getSF(mu_pt, mu_eta).first, muIso_sf = getSF(mu_pt, mu_eta).second;
 

@@ -23,14 +23,14 @@ int main(/*int argc, char** argv*/) {
   names.push_back("data_");//0
   names.push_back("DY_");
   names.push_back("TT_");
-  names.push_back("ST_");
+  //names.push_back("ST_");
   names.push_back("VV_");
 
   vector<TString> vars;
   vars.push_back("taupt_jetpt_pass");
   vars.push_back("taupt_jetpt_fail");
-  vars.push_back("taupt_mupt_pass");
-  vars.push_back("taupt_mupt_fail");
+  //vars.push_back("taupt_mupt_pass");
+  //vars.push_back("taupt_mupt_fail");
 
   vector<TString> dms;
   dms.push_back("DM0");
@@ -83,6 +83,7 @@ int main(/*int argc, char** argv*/) {
       for (unsigned int l=0; l<dms.size(); ++l) {
 	for (unsigned int m=0; m<eta.size(); ++m) {
 	  TString name_in = vars[k]+"_"+dms[l]+"_"+eta[m];
+	  cout << name_in << endl;
 	  if (n==n_real) h_data[k].push_back( (TH2F*) h[0][k][l][m][n_real]->Clone("data_"+name_in) );
 	  h_MC[k][n].push_back( (TH2F*) h[1][k][l][m][n]->Clone("MC_"+name_in+"_"+taun[n]) );
 	  int i = h_MC[k][n].size()-1;

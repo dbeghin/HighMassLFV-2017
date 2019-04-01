@@ -11,6 +11,7 @@ if __name__ == "__main__":
     #name of your *compiled* code (omit the .exe extension)
     code_area = "/user/dbeghin/Work/MuTauHighMass_2017/"
     code_name = "HighMassLFVMuTau"
+    region = "CR100"
     folder = "/user/dbeghin/Work/MuTauHighMass_2017/HighMassLFVMuTau/SignalRegion_CR100/"
     cms_rel = "/user/dbeghin/2nd/new/CMSSW_10_2_6/src"
     proxy = "/user/dbeghin/x509up_u$(id -u dbeghin)"
@@ -46,6 +47,7 @@ if __name__ == "__main__":
                 command1 = command1 + "mkdir "+folder+"/Out_"+myname[jj] + "\n"  #make the ouptu sub-directory
                 command1 = command1 + "export scratchdir=$TMPDIR " + "\n" #temporary directory to be used for running this job
                 command1 = command1 + "cd $scratchdir" + "\n"      
+                command1 = command1 + "cp -r " + code_area + "/Reweighting ." + "\n"
                 command1 = command1 + "cp " + code_area + "/" + code_name + ".exe $scratchdir/" + "\n" #copy your code to the temporary directory
                 outFile.write(command1)
                 #Below: command to submit one job to the localgrid
@@ -55,7 +57,7 @@ if __name__ == "__main__":
             #Note that i[0:-1] is just the name of the root file in /pnfs
             command2 = "dccp dcap://maite.iihe.ac.be"+   i[0:-1] + " $scratchdir/" + "\n"
             bare_fname = i[len(pnfn[jj]):-1]
-            command2 = command2 + "\n" + "./" + code_name + ".exe " + "Outout" + str(ligne)+myname[jj]  + ".root " +   bare_fname
+            command2 = command2 + "\n" + "./" + code_name + ".exe " + "Outout" + str(ligne)+myname[jj]  + ".root " +   bare_fname + " " + mynick[jj] + " " + region + " " + myoption[jj]
             command2 = command2 + "\n" + "rm -f " +   bare_fname
             command2 = command2 + " \n\n\n"
             outFile.write(command2)
