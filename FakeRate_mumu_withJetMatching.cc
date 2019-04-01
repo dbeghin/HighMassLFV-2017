@@ -1,10 +1,12 @@
 #define IIHEAnalysis_cxx
-#include "IIHEAnalysis_old.h"
+#include "IIHEAnalysis_2017.h"
+#include "aux.h"
 //#include <TH1.h>
 #include <TLorentzVector.h>
 //#include <TCanvas.h>
 #include "TString.h"
 #include <iostream>
+#include "PU_reWeighting.cc"
 
 using namespace std;
 
@@ -13,20 +15,23 @@ int main(int argc, char** argv) {
   string out_name= out;
   string in = *(argv + 2);
   string inname= in;
-  string phase_in = *(argv + 3);
+  string mc_in = *(argv + 3);
+  string mc_nickname= mc_in;
+  string phase_in = *(argv + 4);
   string phase= phase_in;
-  string type_in = *(argv + 4);
+  string type_in = *(argv + 5);
   string type= type_in;
   TFile *fIn = TFile::Open(inname.c_str());
   TTree* tree = (TTree*) fIn->Get("IIHEAnalysis");
 
+
   IIHEAnalysis* a = new IIHEAnalysis(tree);
-  a->Loop(phase, type, out_name);
+  a->Loop(phase, type, out_name, mc_nickname);
+  fIn->Close();
   return 0;
 }
 
-
-void IIHEAnalysis::Loop(string phase, string type_of_data, string out_name) {
+void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_name, string mc_nickname) {
   if (fChain == 0) return;
 
   bool DY, data;
@@ -76,8 +81,8 @@ void IIHEAnalysis::Loop(string phase, string type_of_data, string out_name) {
   }
 
   vector<TString> h_names;
-  h_names.push_back("taupt_jetpt_pass"); int iJetPtPass = h_names.size()-1;
-  h_names.push_back("taupt_jetpt_fail"); int iJetPtFail = h_names.size()-1;
+  h_names.push_back("taupt_ratio_pass"); int iJetPtPass = h_names.size()-1;
+  h_names.push_back("taupt_ratio_fail"); int iJetPtFail = h_names.size()-1;
 
   vector<TString> dms;
   dms.push_back("DM0");  int k_DM0  = dms.size()-1;
@@ -94,7 +99,7 @@ void IIHEAnalysis::Loop(string phase, string type_of_data, string out_name) {
     for (unsigned int k = 0; k<dms.size(); ++k) {
       for (unsigned int l = 0; l<eta.size(); ++l) {
 	TString nname = h_names[i]+"_"+dms[k]+"_"+eta[l];
-	hh[i][k].push_back( new TH2F(nname, nname, 1000, 0, 1000, 1000, 0, 1000) );
+	hh[i][k].push_back( new TH2F(nname, nname, 1000, 0, 1000, 1000, 0, 10) );
 	hh[i][k][l]->Sumw2();
       }
     }
@@ -121,7 +126,7 @@ void IIHEAnalysis::Loop(string phase, string type_of_data, string out_name) {
 
     //Is one of the triggers fired?
     bool PassMuonTrigger = false;
-    if (trig_HLT_IsoMu24_accept || trig_HLT_IsoTkMu24_accept) PassMuonTrigger = true;
+    if (trig_HLT_IsoMu27_accept) PassMuonTrigger = true;
     if (!PassMuonTrigger) continue;
 
 
@@ -192,7 +197,10 @@ void IIHEAnalysis::Loop(string phase, string type_of_data, string out_name) {
     }
 
 
-
+    float pu_weight = 1;
+    if (!data) {
+      pu_weight = PU_2017_Rereco::MC_pileup_weight(mc_trueNumInteractions, mc_nickname, "Data_METcorr_2017BtoF");
+    }
 
     //Sort muons, taus, by increasing isolation/decreasing pt                                                                                                                   
     float iso = 1.5, pt = 0.0;
@@ -273,10 +281,10 @@ void IIHEAnalysis::Loop(string phase, string type_of_data, string out_name) {
         if (mu_gt_charge->at(iMu1) * mu_gt_charge->at(iMu2) > 0) continue; //SS veto
 
         if (!data) {
-          final_weight = mc_w_sign*GetReweight_mumu(mc_trueNumInteractions, mu1_p4.Pt(), mu1_p4.Eta(), mu2_p4.Pt(), mu2_p4.Eta());
+          final_weight = mc_w_sign*GetReweight_mumu(mu1_p4.Pt(), mu1_p4.Eta(), mu2_p4.Pt(), mu2_p4.Eta())*pu_weight;
         }
 
-        met_p4.SetPtEtaPhiM(MET_T1Txy_Pt, 0, MET_T1Txy_phi, 0);
+        met_p4.SetPtEtaPhiM(MET_eefix_Pt, 0, MET_eefix_phi, 0);
         metmu_p4 = met_p4 + mu1_p4;
 
 
@@ -383,13 +391,13 @@ void IIHEAnalysis::Loop(string phase, string type_of_data, string out_name) {
             continue;
           }
 
-          
+          double ratio = tau_pt->at(iTau)/jet_p4.Pt();
           //Tau histos
           if (tau_byTightIsolationMVArun2v1DBoldDMwLT->at(iTau) > 0.5) {
-            hh[0][j_dm][k_eta]->Fill(tau_pt->at(iTau), jet_p4.Pt(), final_weight);
+            hh[0][j_dm][k_eta]->Fill(tau_pt->at(iTau), ratio, final_weight);
           }
           if ((tau_byTightIsolationMVArun2v1DBoldDMwLT->at(iTau) < 0.5) && (tau_byVLooseIsolationMVArun2v1DBoldDMwLT->at(iTau) > 0.5)) {
-            hh[1][j_dm][k_eta]->Fill(tau_pt->at(iTau), jet_p4.Pt(), final_weight);
+            hh[1][j_dm][k_eta]->Fill(tau_pt->at(iTau), ratio, final_weight);
           }
         }//loop over taus
       }//loop over mus
