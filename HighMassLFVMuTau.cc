@@ -284,8 +284,8 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
    systs.push_back("topreweight_down_");  systs_map[systs[systs.size()-1]] = systs.size()-1;    syst_weights.push_back(1);
    if (CR_number == 101 || CR_number == 103) {
      //up or down are arbitrary labels, the important thing is they go on different directions
-     systs.push_back("fakerate_up_");     systs_map[systs[systs.size()-1]] = systs.size()-1;    syst_weights.push_back(1);
-     systs.push_back("fakerate_down_");   systs_map[systs[systs.size()-1]] = systs.size()-1;    syst_weights.push_back(1);
+     systs.push_back("fakerate_DY_up_");     systs_map[systs[systs.size()-1]] = systs.size()-1;    syst_weights.push_back(1);
+     systs.push_back("fakerate_norm_up_");   systs_map[systs[systs.size()-1]] = systs.size()-1;    syst_weights.push_back(1);
    }
 
 
@@ -367,6 +367,8 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
           ++print_count;
           //cout << endl << "LHE info" << endl;
         }
+
+	bool found_1 = false, found_2 = false;
         for (unsigned int iLHE = 0; iLHE < LHE_Pt->size(); ++iLHE) {
           if (print_count < 20) {
             //cout << LHE_pdgid->at(iLHE) << "  " << LHE_Pt->at(iLHE) << "  " << LHE_Eta->at(iLHE) << "  " << LHE_Phi->at(iLHE) << "  " << LHE_E->at(iLHE) << endl;
@@ -375,10 +377,12 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
           if (LHE_pdgid->at(iLHE) == 11 || LHE_pdgid->at(iLHE) == 13 || LHE_pdgid->at(iLHE) == 15) {
             l1_p4.SetPtEtaPhiE(LHE_Pt->at(iLHE),LHE_Eta->at(iLHE),LHE_Phi->at(iLHE),LHE_E->at(iLHE));
             l1_pdgid = LHE_pdgid->at(iLHE);
+	    found_1 = true;
           }
           else if (LHE_pdgid->at(iLHE) == -11 || LHE_pdgid->at(iLHE) == -13 || LHE_pdgid->at(iLHE) == -15) {
             l2_p4.SetPtEtaPhiE(LHE_Pt->at(iLHE),LHE_Eta->at(iLHE),LHE_Phi->at(iLHE),LHE_E->at(iLHE));
             l2_pdgid = LHE_pdgid->at(iLHE);
+	    found_2 = true;
           }
       	  if (abs(LHE_pdgid->at(iLHE)) == 13) Zmumu = true;
         }
@@ -673,7 +677,6 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
       }
 
 
-      cout << "2" << endl;
 
       //start loop over reconstructed muons
       bool filled_histos = false;
@@ -730,6 +733,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  mu_gt_transp4.SetPxPyPzE(0, 0, 0, 0);
 
 	  float min_dR = 0.2;
+	  cout << endl << endl << met_p4.Pt() << endl;
 	  for (unsigned int kk=0; kk<mu_gt_pt->size(); ++kk) {
 	    if (!mu_isPFMuon->at(kk)) continue;
 	    mu_gt_p4.SetPtEtaPhiM(mu_gt_pt->at(kk), mu_gt_eta->at(kk), mu_gt_phi->at(kk), mu_mass);
@@ -739,7 +743,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	    mu_gt_transp4.SetPtEtaPhiM(mu_gt_pt->at(kk), 0, mu_gt_phi->at(kk), mu_mass);
 	  }
 	  met_p4 = met_p4 + mu_gt_transp4 - mu_ibt_transp4;
-
+	  cout << met_p4.Pt() << endl;
 
 	  
 	  float Mt = -1;
@@ -989,24 +993,24 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 
 
 
-	  double fake_weight = 1, fake_weight_high = 1, fake_weight_low = 1;
+	  double fake_weight = 1, fake_weight_DY_high = 1, fake_weight_norm_high = 1;
 	  if ((CR_number == 101) || (CR_number == 103)) {
 	    double ratio = 0;
 	    if (jet_p4.Pt() != 0) ratio = tau_p4.Pt()/jet_p4.Pt();
-	    //fake_weight = FakeRate_noratio(tau_p4.Pt(), eta_string); //FIXME
+	    //fake_weight = FakeRate_noratio(tau_p4.Pt(), eta_string);
 	    fake_weight = FakeRate_unfactorised(tau_p4.Pt(), ratio, eta_string);
 	    //fake_weight = FakeRate_factorised(tau_p4.Pt(), ratio, eta_string);
 	    //fake_weight = FakeRate_SSMtLow(tau_p4.Pt(), jet_p4.Pt(), eta_string);
-	    fake_weight_high = FakeRate_SSMtLow(tau_p4.Pt(), jet_p4.Pt(), eta_string);//FakeRate_mumu(tau_p4.Pt(), jet_p4.Pt()); //FIXME
-	    fake_weight_low = 2*fake_weight - fake_weight_high;
+	    fake_weight_DY_high = FakeRate_mumu(tau_p4.Pt(), jet_p4.Pt());
+	    fake_weight_norm_high = FakeRateHigh_mumu(tau_p4.Pt(), ratio, eta_string);
 
 	    if (fake_weight != 0) {
-	      syst_weights[systs_map["fakerate_up_"]] = fake_weight_high/fake_weight;
-	      syst_weights[systs_map["fakerate_down_"]] = fake_weight_low/fake_weight;
+	      syst_weights[systs_map["fakerate_DY_up_"]] = fake_weight_DY_high/fake_weight;
+	      syst_weights[systs_map["fakerate_norm_up_"]] = fake_weight_norm_high/fake_weight;
 	    }
 	    else {
-	      syst_weights[systs_map["fakerate_up_"]] = 1;
-	      syst_weights[systs_map["fakerate_down_"]] = 1;
+	      syst_weights[systs_map["fakerate_DY_up_"]] = 1;
+	      syst_weights[systs_map["fakerate_norm_up_"]] = 1;
 	    }
 	  }
 	  syst_weights[systs_map["topreweight_up_"]] = w_top_up/TT_ptreweight;
