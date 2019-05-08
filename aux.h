@@ -305,12 +305,15 @@ double FakeRate_unfactorised(double taupt, double taueta, double ratio, TString 
   double base_SF = h_taupt->GetBinContent(iBin);
   double error = h_taupt->GetBinError(iBin);
   
+  fake_file->Close("R");
+
   double weight = 0;
   if (var=="nom") weight = base_SF;
   else if (var=="up") weight = base_SF+error;
   else if (var=="down") weight = base_SF-error;
 
-  fake_file->Close("R");
+  if (weight != weight) weight = 0;
+  if (weight < 0) weight = 0;
 
   return weight;
 }
@@ -440,7 +443,6 @@ double GeneralWeightFunction(TString sys, int n_vert, TLorentzVector tau_p4, flo
 
   bool match = false;
   for (unsigned int i=0; i<systematics.size(); ++i) {
-    if (systematics[i]=="TES") continue;
     if (sys==systematics[i]) {
       match = true;
       break;
@@ -461,17 +463,29 @@ double GeneralWeightFunction(TString sys, int n_vert, TLorentzVector tau_p4, flo
 
     float weight = 0;
 
-    if (sys == "minbias") weight = GetPUWeight(n_vert,mc_nickname,var);
-    else if (sys == "muonID") weight = GetHighPtIDWeight(mu_p4,var);
-    else if (sys == "muonIso") weight = GetTkLooseIsoWeight(mu_pt,mu_eta,var);
-    else if (sys == "trigger") weight = GetTriggerWeight(mu_pt,mu_eta,var);
-    else if (sys == "tauID") weight = GetTightTauIDWeight(tau_pt,lepton,var);
-    else if (sys == "eletauFR") weight = GetEleTauFR(tau_eta,lepton,var);
-    else if (sys == "mutauFR") weight = GetMuTauFR(tau_eta,lepton,var);
-    else if (sys == "FRstat") weight = FakeRate_unfactorised(tau_pt,tau_eta,ratio,var);
-    else if (sys == "FRsys") weight = FakeRate_DY(tau_pt,tau_eta,ratio,var);
-    else if (sys == "topPt") weight = GetTopPtWeight(top_pt_1,top_pt_2,var); 
+    if (n_vert>=0) {
+      //this is MC
+      if (sys == "minbias") weight = GetPUWeight(n_vert,mc_nickname,var);
+      else if (sys == "muonID") weight = GetHighPtIDWeight(mu_p4,var);
+      else if (sys == "muonIso") weight = GetTkLooseIsoWeight(mu_pt,mu_eta,var);
+      else if (sys == "trigger") weight = GetTriggerWeight(mu_pt,mu_eta,var);
+      else if (sys == "tauID") weight = GetTightTauIDWeight(tau_pt,lepton,var);
+      else if (sys == "eletauFR") weight = GetEleTauFR(tau_eta,lepton,var);
+      else if (sys == "mutauFR") weight = GetMuTauFR(tau_eta,lepton,var);
+      else if (sys == "FRstat") weight = FakeRate_unfactorised(tau_pt,tau_eta,ratio,var);
+      else if (sys == "FRsys") weight = FakeRate_DY(tau_pt,tau_eta,ratio,var);
+      else if (sys == "topPt") weight = GetTopPtWeight(top_pt_1,top_pt_2,var); 
+    }
+    else {
+      //this is data
+      weight = 1;
+      if (sys == "FRstat") weight = FakeRate_unfactorised(tau_pt,tau_eta,ratio,var);
+      else if (sys == "FRsys") weight = FakeRate_DY(tau_pt,tau_eta,ratio,var);
+    }
 
+    if (weight != weight) weight = 0;
+    if (weight < 0) weight = 0;
+    
     return weight;
   }
 }
@@ -485,7 +499,8 @@ double GetCollinearMass(TLorentzVector tau, TLorentzVector mu,  TLorentzVector M
   double mass_vis=(tau+mu).M();
   double mcol = 0;
   if (mass_vis != mass_vis) mass_vis=0;
-
+  if (mass_vis <= 0) mass_vis = 0;
+  
   if (xth>0) mcol=mass_vis/sqrt(xth);
   else mcol=0;
 

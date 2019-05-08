@@ -256,10 +256,10 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
    vector<TString> histo_names;               vector<int> nBins;     vector<float> x_min,   x_max; 
    histo_names.push_back("ev_Mvis");          nBins.push_back(4000); x_min.push_back(0);    x_max.push_back(4000);
    histo_names.push_back("ev_Mtot");          nBins.push_back(4000); x_min.push_back(0);    x_max.push_back(4000);
-   histo_names.push_back("tau_pt");           nBins.push_back(500);  x_min.push_back(0);    x_max.push_back(500);
+   histo_names.push_back("tau_pt");           nBins.push_back(1000);  x_min.push_back(0);    x_max.push_back(1000);
    histo_names.push_back("tau_eta");          nBins.push_back(50);  x_min.push_back(-2.5); x_max.push_back(2.5);
    histo_names.push_back("tau_phi");          nBins.push_back(64);  x_min.push_back(-3.2); x_max.push_back(3.2);
-   histo_names.push_back("mu_pt");            nBins.push_back(500);  x_min.push_back(0);    x_max.push_back(500);
+   histo_names.push_back("mu_pt");            nBins.push_back(1000); x_min.push_back(0);    x_max.push_back(1000);
    histo_names.push_back("mu_eta");           nBins.push_back(50);   x_min.push_back(-2.5); x_max.push_back(2.5);
    histo_names.push_back("mu_phi");           nBins.push_back(64);   x_min.push_back(-3.2); x_max.push_back(3.2);
    histo_names.push_back("ev_DRmutau");       nBins.push_back(100);  x_min.push_back(0);    x_max.push_back(10);
@@ -617,7 +617,6 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 							);
 	    }
 
-	    cout<<"jet_scalefactor:"<<jet_scalefactor<<endl;
 	    if (jet_scalefactor == 0) jet_scalefactor = 1;
 	    bjet_weight *= jet_scalefactor;
 
@@ -913,15 +912,21 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	}
 
 
-	map<TString, float> weightsSys;
-	first_weight = 1;
-	if (!data) {
-	  //weights and systematics
-	  weightsSys = GetWeightSys(CR_number, mc_trueNumInteractions, tau_p4, ratio, mu_p4, lepton, top_pt_1, top_pt_2, mc_nick);
-	  first_weight = weightsSys["nominal"];
-	  h[lMth][0][jTauN][13]->Fill(first_weight);
-	}
-	final_weight = first_weight;
+	float nVert = -1, mcWeight = 1;
+        if (!data) {
+          nVert = mc_trueNumInteractions;
+          if (mc_weight > 0) mcWeight = 1;
+          else if (mc_weight < 0) mcWeight = -1;
+          else mcWeight = 0;
+        }
+        cout << mcWeight << endl;
+
+        map<TString, float> weightsSys;
+        //weights and systematics                                                                                                                                                                           
+	weightsSys = GetWeightSys(CR_number, nVert, tau_p4, ratio, mu_p4, lepton, top_pt_1, top_pt_2, mc_nick);
+        first_weight = weightsSys["nominal"]*mcWeight;
+	h[lMth][0][jTauN][13]->Fill(first_weight);
+        final_weight = first_weight;
 	
 
 	if (first_weight != first_weight) {
@@ -1012,14 +1017,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	    }
 	  }
 	      
-	  if (!data) {
-	    final_weight = weightsSys[argument];
-	  }
-	  else {
-	    final_weight = first_weight;
-	    if (CR_number == 101 || CR_number == 103) final_weight *= FakeRate_unfactorised(tau_p4.Pt(),tau_p4.Eta(),ratio,"nom");
-	  }
-
+	  final_weight = weightsSys[argument]*mcWeight;
 
 	  cout << "systematic: " << systs[k_syst] << "  weight: " << final_weight << endl;
 	  cout << "tau: " << lepton << "  pt: " << tau_p4.Pt() << endl;
