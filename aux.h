@@ -347,37 +347,36 @@ double FakeRate_factorised(double taupt, double ratio, TString eta) {
 
 
 double FakeRate_DY(double taupt, double taueta, double ratio, TString var) {
-  //if (taupt >= 1000) taupt = 999;
-  //if (ratio >= 2) ratio = 1.9;
-  //
-  //TFile* fake_file = new TFile("Reweighting/fakerate_DY.root","R");
-  //
-  //TString eta_string = GetEtaString(taueta);
-  //
-  //TString hname = "eta_"+eta_string;
-  //if (taupt > 150) {
-  //  hname += "_taupt_150_1000";
-  //}
-  //else {
-  //  hname += "_taupt_0_150";
-  //}
-  //
-  //TH1F* h_taupt = (TH1F*) fake_file->Get("FakeRateByTauPtAndRatio_"+hname);
-  //int iBin = h_taupt->FindBin(taupt, ratio);
-  //double DY_SF = h_taupt->GetBinContent(iBin);
-  //double norm_SF = FakeRate_unfactorised(taupt,taueta,ratio,"nom");
-  //
-  //double weight = 0;
-  //if (var=="nom") weight = 1;
-  //else if (var=="up") weight = DY_SF/norm_SF;
-  //else if (var=="down") weight = (2*norm_SF-DY_SF)/norm_SF;
-  //
-  //return weight;
+  if (taupt >= 1000) taupt = 999;
+  if (ratio >= 2) ratio = 1.9;
 
-  //FIXME
-  return 1;
+  TFile* fake_file = new TFile("Reweighting/fakerate_unfactorised_DY.root","R");
+
+  TString hname = "total";
+  if (taupt > 150) {
+    hname += "_taupt_150_1000";
+  }
+  else {
+    hname += "_taupt_0_150";
+  }
+
+  TH1F* h_taupt = (TH1F*) fake_file->Get("FakeRateByTauPtAndRatio_"+hname);
+  int iBin = h_taupt->FindBin(taupt, ratio);
+  double DY_SF = h_taupt->GetBinContent(iBin);
+  double norm_SF = FakeRate_unfactorised(taupt,taueta,ratio,"nom");
+
+  double weight = 0;
+  if (var=="nom") {
+    weight = 1;
+  }
+  else if (var=="up") {
+    if (norm_SF != 0) weight = DY_SF/norm_SF;
+  }
+  else if (var=="down") {
+    if (norm_SF != 0) weight = (2*norm_SF-DY_SF)/norm_SF;
+  }
+  return weight;
 }
-
 
 
 double GetTopPtWeightUnc(float top_pt_in) {

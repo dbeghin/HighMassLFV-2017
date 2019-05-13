@@ -224,7 +224,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  if (found_mumu_pair) break;
 	  int iMu2 = orderedMu[jj];
 
-	  if (mu_gt_pt->at(iMu1) < 26.0) continue;
+	  if (mu_gt_pt->at(iMu1) < 30.0) continue;
 	  if (fabs(mu_gt_eta->at(iMu1)) > 2.4) continue;
 	  if (!mu_isPFMuon->at(iMu1)) continue;
 	  if (!mu_isMediumMuon->at(iMu1)) continue; //medium ID
@@ -233,7 +233,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  float reliso = mu_pfIsoDbCorrected04->at(iMu1);
 	  if (reliso > 0.15) continue;
 
-	  if (mu_gt_pt->at(iMu2) < 26.0) continue;
+	  if (mu_gt_pt->at(iMu2) < 30.0) continue;
 	  if (fabs(mu_gt_eta->at(iMu2)) > 2.4) continue;
 	  if (!mu_isPFMuon->at(iMu2)) continue; //medium ID
 	  if (!mu_isMediumMuon->at(iMu2)) continue; //medium ID
@@ -355,12 +355,12 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	    if (j_dm == -1 || k_eta == -1) continue;
 
 	    cout << eta_string << endl;
-	    cout << "vloose " << tau_byVLooseIsolationMVArun2v1DBoldDMwLT->at(iTau) << endl;
+	    cout << "vvloose " << tau_byVVLooseIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) << endl;
 	    //Tau histos
-	    if (tau_byTightIsolationMVArun2v1DBoldDMwLT->at(iTau) > 0.5) {
+	    if (tau_byTightIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) > 0.5) {
 	      hh[0][j_dm][k_eta]->Fill(tau_pt->at(iTau), ratio, final_weight);
 	    }
-	    if ((tau_byTightIsolationMVArun2v1DBoldDMwLT->at(iTau) < 0.5) && (tau_byVLooseIsolationMVArun2v1DBoldDMwLT->at(iTau) > 0.5)) {
+	    if ((tau_byTightIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) < 0.5) && (tau_byVVLooseIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) > 0.5)) {
 	      hh[1][j_dm][k_eta]->Fill(tau_pt->at(iTau), ratio, final_weight);
 	    }
 	  }//loop over taus
