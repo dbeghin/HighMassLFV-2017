@@ -12,6 +12,8 @@
 #include "TLegend.h"
 #include "THStack.h"
 #include "TStyle.h"
+#include "TDirectory.h"
+#include "aux.h"
 
 using namespace std;
 int main(/*int argc, char** argv*/) {
@@ -21,17 +23,19 @@ int main(/*int argc, char** argv*/) {
   vector<TString> names;
   names.push_back("data_");//0
   names.push_back("faketau_");
-  names.push_back("faketau_fakerate_up_");
-  names.push_back("faketau_fakerate_down_");
-  names.push_back("faketau_topreweight_up_");
-  names.push_back("faketau_topreweight_down_");
   names.push_back("DY_");
   names.push_back("TT_");
-  names.push_back("TT_topreweight_up_");
-  names.push_back("TT_topreweight_down_");
   //names.push_back("ST_");
   names.push_back("VV_");
   //names.push_back("Signal_");//FIXME
+
+  vector<TString> systs;
+  systs.push_back("nominal");
+  vector<TString> systs_aux = GetSys();
+  for (unsigned int iAux=0; iAux<systs_aux.size(); ++iAux) {
+    systs.push_back(systs_aux[iAux]+"_up");
+    systs.push_back(systs_aux[iAux]+"_down");
+  }
 
 
   //rebin vectors
@@ -40,7 +44,7 @@ int main(/*int argc, char** argv*/) {
 
   vector<float> xpoints_MET {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200, 300, 500/*, 700, 1000*/};
 
-  vector<float> xpoints_pt {0, 10, 20, 30, 40, 50, 60, 70, 80, 100, 150, 300, 1000};
+  vector<float> xpoints_pt {0, 10, 20, 30, 40, 50, 60, 70, 80, 100, 150, 300, 500, 1000};
 
   //vector<float> xpoints_Mt {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120}; //for Mt low FIXME
   vector<float> xpoints_Mt = xpoints; //for Mt high
@@ -59,8 +63,6 @@ int main(/*int argc, char** argv*/) {
   vars.push_back("mu_phi");		    simpleRebin.push_back(true);      rebin.push_back(2);     rebin_vector.push_back(xpoints);
   vars.push_back("mu_isolation");	    simpleRebin.push_back(true);      rebin.push_back(2);     rebin_vector.push_back(xpoints);
   vars.push_back("ev_DRmutau");		    simpleRebin.push_back(true);      rebin.push_back(2);     rebin_vector.push_back(xpoints);
-  vars.push_back("ev_DeltaPhimutau");	    simpleRebin.push_back(true);      rebin.push_back(2);     rebin_vector.push_back(xpoints);
-  vars.push_back("ev_DeltaPhiMETtau");	    simpleRebin.push_back(true);      rebin.push_back(2);     rebin_vector.push_back(xpoints);
   vars.push_back("ev_MET");		    simpleRebin.push_back(false);     rebin.push_back(1);     rebin_vector.push_back(xpoints_MET);
   vars.push_back("ev_Mcol");                simpleRebin.push_back(false);     rebin.push_back(1);     rebin_vector.push_back(xpoints);                
   vars.push_back("ev_Mt");                  simpleRebin.push_back(false);     rebin.push_back(1);     rebin_vector.push_back(xpoints_Mt);                
@@ -75,46 +77,48 @@ int main(/*int argc, char** argv*/) {
 
 
   //retrieve all histos and rebin them
-  vector<TH1F*> h[names.size()][vars.size()];
-  vector<TH1F*> h_rebinned[names.size()][vars.size()];
-  for (unsigned int j=0; j<names.size(); ++j) {
-    for (unsigned int k=0; k<vars.size(); ++k) { 
-      for (unsigned int l=0; l<Mth.size(); ++l) {
-	h[j][k].push_back( (TH1F*) file_in->Get(names[j]+vars[k]+Mth[l]) );
-	h[j][k][l]->SetName(names[j]+vars[k]+Mth[l]+"_old");
+  vector<TH1F*> h[systs.size()][names.size()][vars.size()];
+  vector<TH1F*> h_rebinned[systs.size()][names.size()][vars.size()];
+  for (unsigned int i=0; i<systs.size(); ++i) {
+    for (unsigned int j=0; j<names.size(); ++j) {
+      for (unsigned int k=0; k<vars.size(); ++k) { 
+	for (unsigned int l=0; l<Mth.size(); ++l) {
+	  h[i][j][k].push_back( (TH1F*) file_in->Get(systs[i]+"/"+names[j]+systs[i]+"_"+vars[k]+Mth[l]) );
+	  h[i][j][k][l]->SetName(names[j]+systs[i]+"_"+vars[k]+Mth[l]+"_old");
 
-	if (simpleRebin[k]) {
-	  h_rebinned[j][k].push_back( (TH1F*) h[j][k][l]->Clone(names[j]+vars[k]+Mth[l]) );
-	  h_rebinned[j][k][l]->Rebin(rebin[k]);
-	}
-	else {
-	  int array_size = rebin_vector[k].size();
-	  float rebin_array[array_size];
-	  for (unsigned int ii=0; ii<array_size; ++ii) rebin_array[ii] = rebin_vector[k][ii];
-	  h_rebinned[j][k].push_back( new TH1F(names[j]+vars[k]+Mth[l], names[j]+vars[k]+Mth[l], array_size-1, rebin_array) );
-
-	  int jBin = 1;
-	  float bin_content = 0, bin_error=0;
-	  for (unsigned int iBin=1; iBin < h[j][k][l]->GetNbinsX()+1; ++iBin) {
-	    if (h[j][k][l]->GetBinCenter(iBin) < rebin_array[jBin]) {
-	      bin_content += h[j][k][l]->GetBinContent(iBin);
-	      bin_error += pow(h[j][k][l]->GetBinError(iBin), 2);
-	    }
-	    else {
-	      bin_content = bin_content/(rebin_array[jBin]-rebin_array[jBin-1]);
-	      bin_error = sqrt(bin_error)/(rebin_array[jBin]-rebin_array[jBin-1]);
-	      h_rebinned[j][k][l]->SetBinContent(jBin, bin_content);
-	      h_rebinned[j][k][l]->SetBinError(jBin, bin_error);
-	      bin_content = h[j][k][l]->GetBinContent(iBin);
-	      bin_error = pow(h[j][k][l]->GetBinError(iBin), 2);
-	      
-	      ++jBin;
-	    }
+	  if (simpleRebin[k]) {
+	    h_rebinned[i][j][k].push_back( (TH1F*) h[i][j][k][l]->Clone(names[j]+systs[i]+"_"+vars[k]+Mth[l]) );
+	    h_rebinned[i][j][k][l]->Rebin(rebin[k]);
 	  }
-	  bin_content = bin_content/(rebin_array[jBin]-rebin_array[jBin-1]);
-	  bin_error = sqrt(bin_error)/(rebin_array[jBin]-rebin_array[jBin-1]);
-	  h_rebinned[j][k][l]->SetBinContent(jBin, bin_content);
-	  h_rebinned[j][k][l]->SetBinError(jBin, bin_error);
+	  else {
+	    int array_size = rebin_vector[k].size();
+	    float rebin_array[array_size];
+	    for (unsigned int ii=0; ii<array_size; ++ii) rebin_array[ii] = rebin_vector[k][ii];
+	    h_rebinned[i][j][k].push_back( new TH1F(names[j]+systs[i]+"_"+vars[k]+Mth[l], names[j]+systs[i]+"_"+vars[k]+Mth[l], array_size-1, rebin_array) );
+	  
+	    int jBin = 1;
+	    float bin_content = 0, bin_error=0;
+	    for (unsigned int iBin=1; iBin < h[i][j][k][l]->GetNbinsX()+1; ++iBin) {
+	      if (h[i][j][k][l]->GetBinCenter(iBin) < rebin_array[jBin]) {
+	        bin_content += h[i][j][k][l]->GetBinContent(iBin);
+	        bin_error += pow(h[i][j][k][l]->GetBinError(iBin), 2);
+	      }
+	      else {
+	        bin_content = bin_content/(rebin_array[jBin]-rebin_array[jBin-1]);
+	        bin_error = sqrt(bin_error)/(rebin_array[jBin]-rebin_array[jBin-1]);
+	        h_rebinned[i][j][k][l]->SetBinContent(jBin, bin_content);
+	        h_rebinned[i][j][k][l]->SetBinError(jBin, bin_error);
+	        bin_content = h[i][j][k][l]->GetBinContent(iBin);
+	        bin_error = pow(h[i][j][k][l]->GetBinError(iBin), 2);
+	        
+	        ++jBin;
+	      }
+	    }
+	    bin_content = bin_content/(rebin_array[jBin]-rebin_array[jBin-1]);
+	    bin_error = sqrt(bin_error)/(rebin_array[jBin]-rebin_array[jBin-1]);
+	    h_rebinned[i][j][k][l]->SetBinContent(jBin, bin_content);
+	    h_rebinned[i][j][k][l]->SetBinError(jBin, bin_error);
+	  }
 	}
       }
     }
@@ -123,12 +127,17 @@ int main(/*int argc, char** argv*/) {
 
   //Write the rebinned histos in the output file
   file_out->cd();
-  for (unsigned int j=0; j<names.size(); ++j) {
-    for (unsigned int k=0; k<vars.size(); ++k) {
-      for (unsigned int l=0; l<Mth.size(); ++l) {
-	h_rebinned[j][k][l]->Write();
+  for (unsigned int i=0; i<systs.size(); ++i) {
+    TDirectory* dir = file_out->mkdir( systs[i] );
+    dir->cd();
+    for (unsigned int j=0; j<names.size(); ++j) {
+      for (unsigned int k=0; k<vars.size(); ++k) {
+	for (unsigned int l=0; l<Mth.size(); ++l) {
+	  h_rebinned[i][j][k][l]->Write();
+	}
       }
     }
+    dir->Close();
   }
   file_out->Close();
 

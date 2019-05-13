@@ -12,7 +12,8 @@
 #include "TLegend.h"
 #include "THStack.h"
 #include "TStyle.h"
-
+#include "TDirectory.h"
+#include "aux.h"
 
 using namespace std;
 
@@ -166,8 +167,6 @@ int main(int argc, char** argv) {
   vars.push_back("mu_eta");           
   vars.push_back("mu_phi");           
   vars.push_back("ev_DRmutau");       
-  vars.push_back("ev_DeltaPhimutau"); 
-  vars.push_back("ev_DeltaPhiMETtau");
   vars.push_back("ev_Mt");        
   vars.push_back("ev_MET"); 
   vars.push_back("ev_Mcol"); 
@@ -190,12 +189,11 @@ int main(int argc, char** argv) {
 
 
   vector<TString> systs;
-  systs.push_back("");
-  systs.push_back("topreweight_up_");
-  systs.push_back("topreweight_down_");
-  if (CR == "CR101" || CR == "CR103") {
-    systs.push_back("fakerate_up_");
-    systs.push_back("fakerate_down_");
+  systs.push_back("nominal");
+  vector<TString> systs_aux = GetSys();
+  for (unsigned int iAux=0; iAux<systs_aux.size(); ++iAux) {
+    systs.push_back(systs_aux[iAux]+"_up");
+    systs.push_back(systs_aux[iAux]+"_down");
   }
 
 
@@ -241,20 +239,21 @@ int main(int argc, char** argv) {
 
   file_out->cd();
   //options = is it the DY Sig?, variable name, which file to get the histo from, process cross-section
-  for (unsigned int i = 0; i<vars.size(); ++i) {
-    for (unsigned int j = 0; j<taun.size(); ++j) {
-      for (unsigned int k = 0; k<Mth.size(); ++k) {
-	for (unsigned int l = 0; l<systs.size(); ++l) {
 
-          var_in = vars[i]+"_"+taun[j]+"_"+systs[l]+Mth[k];
+  for (unsigned int l = 0; l<systs.size(); ++l) {
+    TDirectory* dir = file_out->mkdir( systs[l] );
+    dir->cd();
+    for (unsigned int i = 0; i<vars.size(); ++i) {
+      for (unsigned int j = 0; j<taun.size(); ++j) {
+	for (unsigned int k = 0; k<Mth.size(); ++k) {
+	  var_in = systs[l]+"/"+vars[i]+"_"+taun[j]+"_"+systs[l]+"_"+Mth[k];
+	  cout << var_in << endl;
 	  if (CR == "CR100" || CR == "CR102") {
-	    var_out = systs[l]+vars[i]+"_"+Mth[k];
-	  }
-	  else {
-	    var_out = var_in;
-	  }
-          
-          cout << endl << endl <<var_in << endl;
+            var_out = systs[l]+"_"+vars[i]+"_"+Mth[k];
+          }
+          else {
+            var_out = vars[i]+"_"+taun[j]+"_"+systs[l]+"_"+Mth[k];
+          }
           
           vector<TH1F*> h_DY_vector;
           for (unsigned int iBin = 0; iBin<DY_files.size(); ++iBin) {
@@ -315,31 +314,32 @@ int main(int argc, char** argv) {
           h_data -> SetName("data_"+var_out);
           h_data->Rebin(rebin);
           h_data->Write();
+
+	  if (j>0) continue;
+          if (CR == "CR100" || CR == "CR102") {
+            var_in = systs[l]+"_"+vars[i]+"_"+Mth[k];
+            cout << file_in_faketau->GetName() << endl;
+            TH1F* h_faketaus = (TH1F*) file_in_faketau -> Get("faketau_"+var_in);
+            h_faketaus->Write();
+          }
 	}
       }
     }
-    if ((CR == "CR100") || (CR == "CR102")) {
-      for (unsigned int k = 0; k<Mth.size(); ++k) {
-	cout << file_in_faketau->GetName() << endl;
-	TH1F* h_faketaus = (TH1F*) file_in_faketau -> Get("faketau_"+vars[i]+"_"+Mth[k]);
-	h_faketaus->Write();
-	
-	TH1F* h_faketaus_high = (TH1F*) file_in_faketau -> Get("faketau_fakerate_up_"+vars[i]+"_"+Mth[k]);
-	h_faketaus_high->Write();
-	
-	TH1F* h_faketaus_low = (TH1F*) file_in_faketau -> Get("faketau_fakerate_down_"+vars[i]+"_"+Mth[k]);
-	h_faketaus_low->Write();
-	
-	TH1F* h_faketaus_TT_high = (TH1F*) file_in_faketau -> Get("faketau_topreweight_up_"+vars[i]+"_"+Mth[k]);
-	h_faketaus_TT_high->Write();
-	
-	TH1F* h_faketaus_TT_low = (TH1F*) file_in_faketau -> Get("faketau_topreweight_down_"+vars[i]+"_"+Mth[k]);
-	h_faketaus_TT_low->Write();
-      }
-    }
   }
+  cout << "almost" << endl;
   file_out->Close();
+  cout << "done" << endl;
 
+  for (unsigned int iFile=0; iFile<DY_files.size(); ++iFile) DY_files[iFile]->Close();
+  //for (unsigned int iFile=0; iFile<WJets_files.size(); ++iFile) WJets_files[iFile]->Close();
+  for (unsigned int iFile=0; iFile<TT_files.size(); ++iFile) TT_files[iFile]->Close();
+  for (unsigned int iFile=0; iFile<WW_files.size(); ++iFile) WW_files[iFile]->Close();
+  file_in_faketau->Close();
 
+  file_in_WZ->Close();
+  file_in_ZZ->Close();
+
+  file_in_data->Close();
+  
   return 0;
 }
