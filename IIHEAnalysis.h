@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Fri May 17 12:06:11 2019 by ROOT version 6.12/07
+// Tue May 28 11:31:22 2019 by ROOT version 6.12/07
 // from TTree IIHEAnalysis/IIHEAnalysis
-// found on file: outfile_MC.root
+// found on file: /pnfs/iihe/cms/store/user/amkalsi/Legacy_2017/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_v1/190518_075646/0000/outfile_1.root
 //////////////////////////////////////////////////////////
 
 #ifndef IIHEAnalysis_h
@@ -11,21 +11,13 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
-#include "TTree.h"
-#include "TLeaf.h"
-#include "TH1.h"
-#include "TH2.h"
-#include "TGraphErrors.h"
-#include <vector>
-#include <iostream>
-#include "TString.h"
-#include "TLorentzVector.h"
-#include "BTagCalibrationStandalone.cc"
-#include "BTagCalibrationStandalone.h"
 
-
-using namespace std;
-
+// Header file for the classes stored in the TTree if any.
+#include "vector"
+#include "vector"
+#include "vector"
+#include "vector"
+#include "vector"
 
 class IIHEAnalysis {
 public :
@@ -2224,7 +2216,7 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop(string phase, string type_of_data, string out_name, string mc_nickname, Float_t nEvents);
+   virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
@@ -2237,9 +2229,9 @@ IIHEAnalysis::IIHEAnalysis(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("outfile_MC.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/pnfs/iihe/cms/store/user/amkalsi/Legacy_2017/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_v1/190518_075646/0000/outfile_1.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("outfile_MC.root");
+         f = new TFile("/pnfs/iihe/cms/store/user/amkalsi/Legacy_2017/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_v1/190518_075646/0000/outfile_1.root");
       }
       f->GetObject("IIHEAnalysis",tree);
 

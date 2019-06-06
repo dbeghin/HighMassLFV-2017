@@ -30,9 +30,9 @@ int main(int argc, char** argv) {
 
   IIHEAnalysis* a = new IIHEAnalysis(tree);
   a->Loop(phase, type, out_name, mc_nickname, nEvents);
-  fIn->Close();
   return 0;
 }
+
 
 
 //Get weighted events
@@ -73,7 +73,7 @@ Float_t meta::Loop(string type_of_data) {
 ////////////////////////////!\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 //main analysis loop
-void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_name, string mc_nickname, Float_t nEvents) {
+void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_name, string mc_nick, Float_t nEvents) {
    if (fChain == 0) return;
 
    bool DY, data;
@@ -122,9 +122,9 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
      h[i]->Sumw2();
    }
 
-   vector<TString> htau_names;                    vector<int> nBins_tau;     vector<float> x_min_tau,   x_max_tau; 
-   htau_names.push_back("taupt_ratio_pass");      nBins_tau.push_back(1000); x_min_tau.push_back(0);    x_max_tau.push_back(1000);
-   htau_names.push_back("taupt_ratio_fail");      nBins_tau.push_back(1000); x_min_tau.push_back(0);    x_max_tau.push_back(10);
+   vector<TString> htau_names;                
+   htau_names.push_back("taupt_ratio_pass");  
+   htau_names.push_back("taupt_ratio_fail");  
 
    vector<TString> dms;
    dms.push_back("DM0");
@@ -172,6 +172,13 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
       if (trig_HLT_IsoMu27_accept) PassMuonTrigger = true;
       if (!PassMuonTrigger) continue;
 
+      if(!trig_Flag_goodVertices_accept) continue;
+      if(!trig_Flag_globalSuperTightHalo2016Filter_accept) continue;
+      if(!trig_Flag_HBHENoiseFilter_accept) continue;
+      if(!trig_Flag_HBHENoiseIsoFilter_accept) continue;
+      if(!trig_Flag_EcalDeadCellTriggerPrimitiveFilter_accept) continue;
+      if(!trig_Flag_BadPFMuonFilter_accept) continue;
+      if(!trig_Flag_ecalBadCalibReduced) continue;
 
 
       //Sort muons, taus, by increasing isolation/decreasing pt                                                                                                                   
@@ -224,7 +231,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  if (found_mumu_pair) break;
 	  int iMu2 = orderedMu[jj];
 
-	  if (mu_gt_pt->at(iMu1) < 30.0) continue;
+	  if (mu_gt_pt->at(iMu1) < 26.0) continue;
 	  if (fabs(mu_gt_eta->at(iMu1)) > 2.4) continue;
 	  if (!mu_isPFMuon->at(iMu1)) continue;
 	  if (!mu_isMediumMuon->at(iMu1)) continue; //medium ID
@@ -233,7 +240,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  float reliso = mu_pfIsoDbCorrected04->at(iMu1);
 	  if (reliso > 0.15) continue;
 
-	  if (mu_gt_pt->at(iMu2) < 30.0) continue;
+	  if (mu_gt_pt->at(iMu2) < 26.0) continue;
 	  if (fabs(mu_gt_eta->at(iMu2)) > 2.4) continue;
 	  if (!mu_isPFMuon->at(iMu2)) continue; //medium ID
 	  if (!mu_isMediumMuon->at(iMu2)) continue; //medium ID
@@ -252,10 +259,10 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  if (mu_gt_charge->at(iMu1) * mu_gt_charge->at(iMu2) > 0) continue; //SS veto
 
 	  if (!data) {
-	    final_weight = mc_w_sign*GetReweight_mumu(mu1_p4.Pt(), mu1_p4.Eta(), mu2_p4.Pt(), mu2_p4.Eta())*GetPUWeight(mc_trueNumInteractions,mc_nickname,"nom");
-	  }
+            final_weight = mc_w_sign*GetReweight_mumu(mu1_p4.Pt(), mu1_p4.Eta(), mu2_p4.Pt(), mu2_p4.Eta())*GetPUWeight(mc_trueNumInteractions,mc_nick,"nom");
+          }
 	  
-	  met_p4.SetPtEtaPhiM(MET_eefix_Pt, 0, MET_eefix_phi, 0);
+	  met_p4.SetPtEtaPhiM(MET_T1Txy_Pt, 0, MET_T1Txy_phi, 0);
 	  metmu_p4 = met_p4 + mu1_p4;
 	  
 
@@ -289,7 +296,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	    TLorentzVector jet_p4(0.,0.,0.,0.);
 	    for (unsigned int ijet = 0; ijet < jet_pt->size(); ijet++){
 	      if(!(fabs(jet_eta->at(ijet)) < 2.3)) continue;
-	      if(!(jet_isJetIDLoose->at(ijet))) continue;
+	      if(!(jet_isJetID_2017->at(ijet))) continue;
 	      TLorentzVector jet_p4_tmp;
 	      jet_p4_tmp.SetPxPyPzE(jet_px->at(ijet), jet_py->at(ijet), jet_pz->at(ijet), jet_energy->at(ijet));
 	      if(!(tau_p4.DeltaR(jet_p4_tmp) < 0.2)) continue;

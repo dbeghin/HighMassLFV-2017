@@ -126,6 +126,7 @@ int main(int argc, char** argv) {
 	h_data->RebinX(rebin);
 	h_data->RebinY(rebin);
 	h_data->Write();
+	delete h_data;
       }
     }
   }

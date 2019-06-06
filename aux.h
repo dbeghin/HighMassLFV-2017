@@ -279,10 +279,12 @@ double FakeRateHigh_unfactorised(double taupt, double ratio, TString eta) {
   return reweight;
 }
 
-
-double FakeRate_unfactorised(double taupt, double taueta, double ratio, TString var) {
+double FakeRate_unfactorised(double taupt, double taueta, double ratio, TString sys, TString var) {
   if (taupt >= 1000) taupt = 999;
   if (ratio >= 2) ratio = 1.9;
+  cout << "fake rate: " << sys << "  var: " << var << endl;
+  if (sys != "FRstat" && sys != "FRsys") var = "nom";
+  cout << "fake rate: " << sys << "  var: " << var << endl;
 
   TFile* fake_file = new TFile("Reweighting/fakerate_unfactorised_MtLow.root","R");
 
@@ -292,7 +294,7 @@ double FakeRate_unfactorised(double taupt, double taueta, double ratio, TString 
     return 0;
   }
 
-  TString hname = "eta_"+eta_string;
+  TString hname = sys+"_"+eta_string;
   if (taupt > 150) {
     hname += "_taupt_150_1000";
   }
@@ -304,19 +306,55 @@ double FakeRate_unfactorised(double taupt, double taueta, double ratio, TString 
   int iBin = h_taupt->FindBin(taupt, ratio);
   double base_SF = h_taupt->GetBinContent(iBin);
   double error = h_taupt->GetBinError(iBin);
-  
-  fake_file->Close("R");
 
   double weight = 0;
   if (var=="nom") weight = base_SF;
   else if (var=="up") weight = base_SF+error;
   else if (var=="down") weight = base_SF-error;
 
-  if (weight != weight) weight = 0;
-  if (weight < 0) weight = 0;
+  fake_file->Close("R");
 
   return weight;
 }
+
+
+//double FakeRate_unfactorised(double taupt, double taueta, double ratio, TString var) {
+//  if (taupt >= 1000) taupt = 999;
+//  if (ratio >= 2) ratio = 1.9;
+//
+//  TFile* fake_file = new TFile("Reweighting/fakerate_unfactorised_MtLow.root","R");
+//
+//  TString eta_string = GetEtaString(taueta);
+//  if (eta_string == "") {
+//    fake_file->Close("R");
+//    return 0;
+//  }
+//
+//  TString hname = "eta_"+eta_string;
+//  if (taupt > 150) {
+//    hname += "_taupt_150_1000";
+//  }
+//  else {
+//    hname += "_taupt_0_150";
+//  }
+//
+//  TH1F* h_taupt = (TH1F*) fake_file->Get("FakeRateByTauPtAndRatio_"+hname);
+//  int iBin = h_taupt->FindBin(taupt, ratio);
+//  double base_SF = h_taupt->GetBinContent(iBin);
+//  double error = h_taupt->GetBinError(iBin);
+//  
+//  fake_file->Close("R");
+//
+//  double weight = 0;
+//  if (var=="nom") weight = base_SF;
+//  else if (var=="up") weight = base_SF+error;
+//  else if (var=="down") weight = base_SF-error;
+//
+//  if (weight != weight) weight = 0;
+//  if (weight < 0) weight = 0;
+//
+//  return weight;
+//}
 
 
 
@@ -346,7 +384,7 @@ double FakeRate_factorised(double taupt, double ratio, TString eta) {
 }
 
 
-double FakeRate_DY(double taupt, double taueta, double ratio, TString var) {
+double FakeRate_DY(double taupt, double taueta, double ratio, TString sys, TString var) {
   if (taupt >= 1000) taupt = 999;
   if (ratio >= 2) ratio = 1.9;
 
@@ -363,7 +401,7 @@ double FakeRate_DY(double taupt, double taueta, double ratio, TString var) {
   TH1F* h_taupt = (TH1F*) fake_file->Get("FakeRateByTauPtAndRatio_"+hname);
   int iBin = h_taupt->FindBin(taupt, ratio);
   double DY_SF = h_taupt->GetBinContent(iBin);
-  double norm_SF = FakeRate_unfactorised(taupt,taueta,ratio,"nom");
+  double norm_SF = FakeRate_unfactorised(taupt,taueta,ratio,sys,"nom");
 
   double weight = 0;
   if (var=="nom") {
@@ -471,15 +509,15 @@ double GeneralWeightFunction(TString sys, int n_vert, TLorentzVector tau_p4, flo
       else if (sys == "tauID") weight = GetTightTauIDWeight(tau_pt,lepton,var);
       else if (sys == "eletauFR") weight = GetEleTauFR(tau_eta,lepton,var);
       else if (sys == "mutauFR") weight = GetMuTauFR(tau_eta,lepton,var);
-      else if (sys == "FRstat") weight = FakeRate_unfactorised(tau_pt,tau_eta,ratio,var);
-      else if (sys == "FRsys") weight = FakeRate_DY(tau_pt,tau_eta,ratio,var);
+      else if (sys == "FRstat") weight = FakeRate_unfactorised(tau_pt,tau_eta,ratio,sys,var);
+      else if (sys == "FRsys") weight = FakeRate_DY(tau_pt,tau_eta,ratio,sys,var);
       else if (sys == "topPt") weight = GetTopPtWeight(top_pt_1,top_pt_2,var); 
     }
     else {
       //this is data
       weight = 1;
-      if (sys == "FRstat") weight = FakeRate_unfactorised(tau_pt,tau_eta,ratio,var);
-      else if (sys == "FRsys") weight = FakeRate_DY(tau_pt,tau_eta,ratio,var);
+      if (sys == "FRstat") weight = FakeRate_unfactorised(tau_pt,tau_eta,ratio,sys,var);
+      else if (sys == "FRsys") weight = FakeRate_DY(tau_pt,tau_eta,ratio,sys,var);
     }
 
     if (weight != weight) weight = 0;
