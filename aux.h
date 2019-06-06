@@ -26,6 +26,7 @@ vector<TString> GetSys() {
   systematics.push_back("minbias");
   systematics.push_back("muonID");
   systematics.push_back("muonIso");
+  systematics.push_back("tracking");
   systematics.push_back("trigger");
   systematics.push_back("tauID");
   systematics.push_back("eletauFR");
@@ -73,12 +74,29 @@ double GetHighPtIDWeight(TLorentzVector mu_p4, TString var) {
   if (mu_pt > 120) mu_pt = 119;
   float mu_eta = mu_p4.Eta();
 
-  //scale factors                                                                                                                                                                                                                                                                                                                            
-  //ID
+  //scale factors 
+  //ID                                   
   TH2F* ID_histo = (TH2F*) ID_file->Get("NUM_HighPtID_DEN_genTracks_pair_newTuneP_probe_pt_abseta");
   int bin_in = ID_histo->FindBin(mu_pt, fabs(mu_eta));
   double highPtID_sf = ID_histo->GetBinContent(bin_in);
-  double error = ID_histo->GetBinError(bin_in);
+  double error = pow(ID_histo->GetBinError(bin_in),2);
+  double error_highpt = 0;
+  if (var == "down") {
+    if (mu_eta < 1.6) {
+      if (mu_p4.P() > 100) {
+	//data eff modeled as flat, divide it by MC to get SF, get the difference wrt to the nominal SF
+	error_highpt = fabs( ( 0.9936 - 3.71e-6*mu_p4.P() ) - highPtID_sf); 
+      }
+    }
+    else if (mu_eta < 2.4) {
+      if (mu_p4.P() > 200) {
+	//data and MC eff vary here, get the difference wrt to the nominal SF
+	error_highpt = fabs( ( 0.9784 - 4.73e-5*mu_p4.P() ) / ( 0.9908 - 1.26e-5*mu_p4.P() ) - highPtID_sf); 
+      }
+    }
+  }
+  error += pow(error_highpt,2);
+  error = sqrt(error);
 
   double weight = 0;
   if (var == "nom") {
@@ -131,6 +149,22 @@ double GetTriggerWeight(float mu_pt, float mu_eta, TString var) {
 }
 
 
+double GetTrackingWeight(TString var) {
+  double tracker_sf = 1;
+  double factor = 0;
+  if (mu_pt < 300) factor = .005;
+  else factor = .01;
+
+  double weight = 0;
+  if (var=="nom") weight = tracker_sf;
+  else if (var=="up") weight = tracker_sf*(1+factor);
+  else if (var=="down") weight = tracker_sf*(1-factor);
+  
+  Tracker_file->Close("R");
+  return weight;
+}
+
+
 double GetTkLooseIsoWeight(float mu_pt, float mu_eta, TString var) {
   if (mu_pt > 120) mu_pt = 119;
   TFile* Iso_file = new TFile("Reweighting/RunBCDEF_SF_ISO_syst.root","R");
@@ -138,7 +172,7 @@ double GetTkLooseIsoWeight(float mu_pt, float mu_eta, TString var) {
   TH2F* Iso_histo = (TH2F*) Iso_file->Get("NUM_LooseRelTkIso_DEN_HighPtIDandIPCut_pair_newTuneP_probe_pt_abseta");
   int bin_in = Iso_histo->FindBin(mu_pt, fabs(mu_eta));
   double tkLooseISO_sf = Iso_histo->GetBinContent(bin_in);
-  double factor = Iso_histo->GetBinError(bin_in);
+  double factor = sqrt(pow(.005,2) + pow(.02,2))*tkLooseISO_sf; //stat 0.5% syst 2%
 
   double weight = 0;
   if (var=="nom") weight = tkLooseISO_sf;
@@ -231,53 +265,6 @@ double GetMuTauFR(float eta, TString lepton, TString var) {
 
 
 
-double FakeRate_noratio(double taupt, TString eta) {
-  double SF=0.2;
-  if (taupt >= 1000) taupt = 999;
-
-  TFile* fake_file = new TFile("Reweighting/fakerate_MtLow.root","R");
-
-  double reweight = 0;
-
-  TString hname = "eta_"+eta;
-  TH1F* h_taupt = (TH1F*) fake_file->Get("FakeRateByTauPt_"+hname);
-  int iBin = h_taupt->FindBin(taupt);
-  double base_SF = h_taupt->GetBinContent(iBin);
-  
-  SF = base_SF;
-  reweight = SF;
-
-  return reweight;
-}
-
-
-
-double FakeRateHigh_unfactorised(double taupt, double ratio, TString eta) {
-  double SF=0.2;
-  if (taupt >= 1000) taupt = 999;
-  if (ratio >= 2) ratio = 1.9;
-
-  TFile* fake_file = new TFile("Reweighting/fakerate_unfactorised_MtLow.root","R");
-
-  double reweight = 0;
-
-  TString hname = "eta_"+eta;
-  if (taupt > 150) {
-    hname += "_taupt_150_1000";
-  }
-  else {
-    hname += "_taupt_0_150";
-  }
-
-  TH1F* h_taupt = (TH1F*) fake_file->Get("FakeRateByTauPtAndRatio_"+hname);
-  int iBin = h_taupt->FindBin(taupt, ratio);
-  double base_SF = h_taupt->GetBinContent(iBin)+h_taupt->GetBinError(iBin);
-
-  SF = base_SF;
-  reweight = SF;
-
-  return reweight;
-}
 
 double FakeRate_unfactorised(double taupt, double taueta, double ratio, TString sys, TString var) {
   if (taupt >= 1000) taupt = 999;
@@ -318,70 +305,6 @@ double FakeRate_unfactorised(double taupt, double taueta, double ratio, TString 
 }
 
 
-//double FakeRate_unfactorised(double taupt, double taueta, double ratio, TString var) {
-//  if (taupt >= 1000) taupt = 999;
-//  if (ratio >= 2) ratio = 1.9;
-//
-//  TFile* fake_file = new TFile("Reweighting/fakerate_unfactorised_MtLow.root","R");
-//
-//  TString eta_string = GetEtaString(taueta);
-//  if (eta_string == "") {
-//    fake_file->Close("R");
-//    return 0;
-//  }
-//
-//  TString hname = "eta_"+eta_string;
-//  if (taupt > 150) {
-//    hname += "_taupt_150_1000";
-//  }
-//  else {
-//    hname += "_taupt_0_150";
-//  }
-//
-//  TH1F* h_taupt = (TH1F*) fake_file->Get("FakeRateByTauPtAndRatio_"+hname);
-//  int iBin = h_taupt->FindBin(taupt, ratio);
-//  double base_SF = h_taupt->GetBinContent(iBin);
-//  double error = h_taupt->GetBinError(iBin);
-//  
-//  fake_file->Close("R");
-//
-//  double weight = 0;
-//  if (var=="nom") weight = base_SF;
-//  else if (var=="up") weight = base_SF+error;
-//  else if (var=="down") weight = base_SF-error;
-//
-//  if (weight != weight) weight = 0;
-//  if (weight < 0) weight = 0;
-//
-//  return weight;
-//}
-
-
-
-
-double FakeRate_factorised(double taupt, double ratio, TString eta) {
-  double SF=0.2;
-  if (taupt >= 1000) taupt = 999;
-  if (ratio >= 2) ratio = 1.9;
-
-  TFile* fake_file = new TFile("Reweighting/fakerate_MtLow.root","R");
-
-  double reweight = 0;
-
-  TString hname = "eta_"+eta;
-  TH1F* h_taupt = (TH1F*) fake_file->Get("FakeRateByTauPt_"+hname);
-  int iBin = h_taupt->FindBin(taupt);
-  double base_SF = h_taupt->GetBinContent(iBin);
-
-  TH1F* h_corr = (TH1F*) fake_file->Get("RatioCorrectionFactor_"+hname);
-  iBin = h_corr->FindBin(ratio);
-  double corr_factor = h_corr->GetBinContent(iBin);
-
-  SF = corr_factor*base_SF;
-  reweight = SF;
-
-  return reweight;
-}
 
 
 double FakeRate_DY(double taupt, double taueta, double ratio, TString sys, TString var) {
@@ -505,6 +428,7 @@ double GeneralWeightFunction(TString sys, int n_vert, TLorentzVector tau_p4, flo
       if (sys == "minbias") weight = GetPUWeight(n_vert,mc_nickname,var);
       else if (sys == "muonID") weight = GetHighPtIDWeight(mu_p4,var);
       else if (sys == "muonIso") weight = GetTkLooseIsoWeight(mu_pt,mu_eta,var);
+      else if (sys == "tracking") weight = GetTrackingWeight(var);
       else if (sys == "trigger") weight = GetTriggerWeight(mu_pt,mu_eta,var);
       else if (sys == "tauID") weight = GetTightTauIDWeight(tau_pt,lepton,var);
       else if (sys == "eletauFR") weight = GetEleTauFR(tau_eta,lepton,var);
