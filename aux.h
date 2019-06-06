@@ -26,7 +26,7 @@ vector<TString> GetSys() {
   systematics.push_back("minbias");
   systematics.push_back("muonID");
   systematics.push_back("muonIso");
-  systematics.push_back("tracking");
+  //systematics.push_back("tracking");
   systematics.push_back("trigger");
   systematics.push_back("tauID");
   systematics.push_back("eletauFR");
@@ -149,7 +149,7 @@ double GetTriggerWeight(float mu_pt, float mu_eta, TString var) {
 }
 
 
-double GetTrackingWeight(TString var) {
+double GetTrackingWeight(float mu_pt, TString var) {
   double tracker_sf = 1;
   double factor = 0;
   if (mu_pt < 300) factor = .005;
@@ -160,7 +160,6 @@ double GetTrackingWeight(TString var) {
   else if (var=="up") weight = tracker_sf*(1+factor);
   else if (var=="down") weight = tracker_sf*(1-factor);
   
-  Tracker_file->Close("R");
   return weight;
 }
 
@@ -191,7 +190,7 @@ double GetTightTauIDWeight(float tau_pt, TString lepton, TString var) {
     return 1;
   }
   else {
-    double base_weight = 0.95;
+    double base_weight = 0.89;
     double factor_up   = sqrt( pow(.05,2) + pow(0.05*tau_pt/1000,2) );
     double factor_down = sqrt( pow(.05,2) + pow(-0.35*tau_pt/1000,2) );
     
@@ -428,7 +427,7 @@ double GeneralWeightFunction(TString sys, int n_vert, TLorentzVector tau_p4, flo
       if (sys == "minbias") weight = GetPUWeight(n_vert,mc_nickname,var);
       else if (sys == "muonID") weight = GetHighPtIDWeight(mu_p4,var);
       else if (sys == "muonIso") weight = GetTkLooseIsoWeight(mu_pt,mu_eta,var);
-      else if (sys == "tracking") weight = GetTrackingWeight(var);
+      else if (sys == "tracking") weight = GetTrackingWeight(mu_pt,var);
       else if (sys == "trigger") weight = GetTriggerWeight(mu_pt,mu_eta,var);
       else if (sys == "tauID") weight = GetTightTauIDWeight(tau_pt,lepton,var);
       else if (sys == "eletauFR") weight = GetEleTauFR(tau_eta,lepton,var);

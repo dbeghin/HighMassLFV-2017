@@ -25,7 +25,7 @@ int main(/*int argc, char** argv*/) {
   names.push_back("faketau_");
   names.push_back("DY_");
   names.push_back("TT_");
-  //names.push_back("ST_");
+  names.push_back("ST_");
   names.push_back("VV_");
   //names.push_back("Signal_");//FIXME
 

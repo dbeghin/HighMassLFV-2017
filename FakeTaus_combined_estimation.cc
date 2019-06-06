@@ -101,6 +101,8 @@ int main(int argc, char** argv) {
 	  if (h_faketau->GetBinContent(iBin) < 0) h_faketau->SetBinContent(iBin,0);
 	}
 	h_faketau->Write();
+	delete h_faketau;
+	for (unsigned int j=0; j<names.size(); ++j) delete h[j][k][l][m];
       }
     }
   }

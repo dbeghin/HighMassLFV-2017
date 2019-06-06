@@ -256,15 +256,11 @@ int main(int argc, char** argv) {
 	    h_ST->Write();
 	    delete h_ST;
 	    
-	    cout << "a" << endl;
 	    TH2F* h_data = (TH2F*) file_in_data -> Get(var_in);//Data is, by definition, normalized
-	    cout << "b" << endl;
 	    h_data -> SetName("data_"+var_out);
-	    cout << "c" << endl;
 	    h_data->RebinX(rebin);
 	    h_data->RebinY(rebin);
 	    h_data->Write();
-	    cout << "d" << endl;
 	    delete h_data;
 	  }
 	}

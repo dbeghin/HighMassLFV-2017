@@ -313,7 +313,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
      for (unsigned int j = 0; j<taun.size(); ++j) {
        for (unsigned int l = 0; l<systs.size(); ++l) {
 	 for (unsigned int k = 0; k<Mth.size(); ++k) {
-	   h[k][l][j].push_back( new TH1F(histo_names[i]+"_"+taun[j]+"_"+systs[l]+Mth[k], histo_names[i]+"_"+taun[j]+"_"+systs[l]+Mth[k], nBins[i], x_min[i], x_max[i]) ); 
+	   h[k][l][j].push_back( new TH1F(histo_names[i]+"_"+taun[j]+"_"+systs[l]+"_"+Mth[k], histo_names[i]+"_"+taun[j]+"_"+systs[l]+"_"+Mth[k], nBins[i], x_min[i], x_max[i]) ); 
 	   h[k][l][j][i]->Sumw2();
 	 }
        }
@@ -812,7 +812,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	bool tau_match = false;
 	float dR_threshold = 0.4;
 
-	if (!data && !signal) {
+	if (!data) {
 	  //fill gen histos to understand wth is going on
 	  for (unsigned int iGen = 0; iGen<tauhp4.size(); ++iGen) {
 	    hgen[0]->Fill(tauhp4[iGen].Pt(), mc_w_sign);
@@ -1095,7 +1095,6 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
    h_total_events->Fill(0.5, nEvents);
    file_out->cd();
    h_total_events->Write();
-   for (unsigned int i = 0; i<h_names.size(); ++i) for (unsigned int j = 0; j<Mth.size(); ++j) for (unsigned int k = 0; k<systs.size(); ++k) for (unsigned int l = 0; l<eta.size(); ++l) hh[i][j][k][l]->Write();
    for (unsigned int i = 0; i<hgen.size(); ++i) hgen[i]->Write();
 
    vector<TDirectory*> d_sys;
@@ -1103,6 +1102,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
      d_sys.push_back( file_out->mkdir( systs[k] ) );
      d_sys[k]->cd();
      for (unsigned int i = 0; i<histo_names.size(); ++i) for (unsigned int j = 0; j<taun.size(); ++j) for (unsigned int l = 0; l<Mth.size(); ++l) h[l][k][j][i]->Write();
+     for (unsigned int i = 0; i<h_names.size(); ++i) for (unsigned int j = 0; j<Mth.size(); ++j) for (unsigned int l = 0; l<eta.size(); ++l) hh[i][j][k][l]->Write();
      d_sys[k]->Close();
    }
    file_out->Close();
