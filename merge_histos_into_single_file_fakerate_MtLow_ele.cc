@@ -54,7 +54,7 @@ TH2F* MC_histo_TH2(TString var, TFile* file_in, TFile* file_in_d, double xs, int
   cout << file_in->GetName() << endl;
 
   TH1F* h_events_data = (TH1F*) file_in_d->Get("weighted_events");
-  double full_data = 7.3968038e+08;
+  double full_data = 4.607446897e+08;
   double succ_data_ratio = h_events_data->Integral()/full_data;
   cout << "succesfull data ratio " << succ_data_ratio << endl;
   double lumi = 41.529 * pow(10,3) * succ_data_ratio; //luminosity in pb^-1                                                                                                                                 
@@ -89,8 +89,8 @@ int main(int argc, char** argv) {
   int rebin = 1;
 
   //TString folder_in = "HighMassLFVMuTau/FakeRate_SSMtLow";
-  TString folder_in = "HighMassLFVMuTau/SignalRegion_CR100";
-  TString name_out = "histos_fakerate_MtLow";
+  TString folder_in = "HighMassLFVETau/SignalRegion_CR100";
+  TString name_out = "histos_fakerate_MtLow_ele";
 
   TFile* file_out = new TFile("Figures/"+name_out+".root", "RECREATE");
 
@@ -142,14 +142,11 @@ int main(int argc, char** argv) {
   Mth.push_back("MtLow_SS");
 
   
-  vector<TString> systs;
-  systs.push_back("nominal");
+  vector<TString> dms;
+  dms.push_back("DM0");
+  dms.push_back("DM1");
+  dms.push_back("DM10");
 
-  vector<TString> systs_aux = GetSys();
-  for (unsigned int iAux=0; iAux<systs_aux.size(); ++iAux) {
-    systs.push_back(systs_aux[iAux]+"_up");
-    systs.push_back(systs_aux[iAux]+"_down");
-  }
 
   vector<TString> eta;
   eta.push_back("barrel");
@@ -207,17 +204,17 @@ int main(int argc, char** argv) {
   file_out->cd();
   for (unsigned int i = 0; i<vars_TH2.size(); ++i) {
     for (unsigned int m = 0; m<Mth.size(); ++m) {
-      for (unsigned int j = 0; j<systs.size(); ++j) {
-        for (unsigned int k = 0; k<eta.size(); ++k) {
-          for (unsigned int l = 0; l<taun.size(); ++l) {
-            var_in = vars_TH2[i]+"_"+systs[j]+"_"+Mth[m]+"_"+eta[k]+"_"+taun[l];
+      for (unsigned int j = 0; j<dms.size(); ++j) {
+	for (unsigned int k = 0; k<eta.size(); ++k) {
+	  for (unsigned int l = 0; l<taun.size(); ++l) {
+            var_in = vars_TH2[i]+"_"+Mth[m]+"_"+dms[j]+"_"+eta[k]+"_"+taun[l];
 	    var_out = var_in;
 	    
 	    cout << endl << endl <<var_in << endl;
             
 	    vector<TH2F*> h_DY_vector;
 	    for (unsigned int iBin = 0; iBin<DY_files.size(); ++iBin) {
-	      h_DY_vector.push_back( MC_histo_TH2(systs[j]+"/"+var_in, DY_files[iBin], file_in_data, xs_DY[iBin], rebin) ); 
+	      h_DY_vector.push_back( MC_histo_TH2(var_in, DY_files[iBin], file_in_data, xs_DY[iBin], rebin) ); 
 	    }
 	    TH2F* h_DY = (TH2F*) h_DY_vector[0]->Clone("DY_"+var_out);
 	    for (unsigned int iBin = 1; iBin<DY_files.size(); ++iBin) {
@@ -226,10 +223,10 @@ int main(int argc, char** argv) {
 	    h_DY->Write();
 	    delete h_DY;
 	    for (unsigned int iBin = 0; iBin<DY_files.size(); ++iBin) delete h_DY_vector[iBin];
-
+	    
 	    vector<TH2F*> h_TT_vector;
 	    for (unsigned int iBin = 0; iBin<TT_files.size(); ++iBin) {
-	      h_TT_vector.push_back( MC_histo_TH2(systs[j]+"/"+var_in, TT_files[iBin], file_in_data, xs_TT[iBin], rebin) ); 
+	      h_TT_vector.push_back( MC_histo_TH2(var_in, TT_files[iBin], file_in_data, xs_TT[iBin], rebin) ); 
 	    }
 	    TH2F* h_TT = (TH2F*) h_TT_vector[0]->Clone("TT_"+var_out);
 	    for (unsigned int iBin = 1; iBin<h_TT_vector.size(); ++iBin) {
@@ -241,7 +238,7 @@ int main(int argc, char** argv) {
             
 	    vector<TH2F*> h_VV_vector;
 	    for (unsigned int iBin = 0; iBin<VV_files.size(); ++iBin) {
-	      h_VV_vector.push_back( MC_histo_TH2(systs[j]+"/"+var_in, VV_files[iBin], file_in_data, xs_VV[iBin], rebin) ); 
+	      h_VV_vector.push_back( MC_histo_TH2(var_in, VV_files[iBin], file_in_data, xs_VV[iBin], rebin) ); 
 	    }
 	    TH2F* h_VV = (TH2F*) h_VV_vector[0]->Clone("VV_"+var_out);
 	    for (unsigned int iBin = 1; iBin<h_VV_vector.size(); ++iBin) {
@@ -252,12 +249,12 @@ int main(int argc, char** argv) {
 	    delete h_VV;
 	    for (unsigned int iBin = 0; iBin<VV_files.size(); ++iBin) delete h_VV_vector[iBin];
             
-	    TH2F* h_ST = MC_histo_TH2(systs[j]+"/"+var_in, file_in_ST, file_in_data, xs_ST, rebin);
+	    TH2F* h_ST = MC_histo_TH2(var_in, file_in_ST, file_in_data, xs_ST, rebin);
 	    h_ST->SetName("ST_"+var_out);
 	    h_ST->Write();
 	    delete h_ST;
 	    
-	    TH2F* h_data = (TH2F*) file_in_data -> Get(systs[j]+"/"+var_in);//Data is, by definition, normalized
+	    TH2F* h_data = (TH2F*) file_in_data -> Get(var_in);//Data is, by definition, normalized
 	    h_data -> SetName("data_"+var_out);
 	    h_data->RebinX(rebin);
 	    h_data->RebinY(rebin);

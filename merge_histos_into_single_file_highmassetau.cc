@@ -59,52 +59,28 @@ int main(int argc, char** argv) {
 
   TString folder_in = "";
   TString name_out = "";
-  if (CR == "CR0" || CR == "CR00") {
-    folder_in = "HighMassLFVMuTau/OSisomuisotau_CR0"; 
-  }
-  else if (CR == "CR1") {
-    folder_in = "HighMassLFVMuTau/SSisomuisotau_CR1"; 
-  }
-  else if (CR == "CR2") {
-    folder_in = "HighMassLFVMuTau/OSisomuantitau_CR2"; 
-  }
-  else if (CR == "CR3") {
-    folder_in = "HighMassLFVMuTau/SSisomuantitau_CR3"; 
-  }
-  else if (CR == "CR4") {
-    folder_in = "HighMassLFVMuTau/OSantimuantitau_CR4"; 
-  }
-  else if (CR == "CR5") {
-    folder_in = "HighMassLFVMuTau/SSantimuantitau_CR5";
-  }
-  else if (CR == "CR7") {
-    folder_in = "HighMassLFVMuTau/Wjets_CR7";
-  }
-  else if (CR == "CR9") {
-    folder_in = "HighMassLFVMuTau/Wjets_CR9";
-  }
-  else if (CR == "CR100") {
-    folder_in = "HighMassLFVMuTau/SignalRegion_CR100";
+  if (CR == "CR100") {
+    folder_in = "HighMassLFVETau/SignalRegion_CR100";
   }
   else if (CR == "CR101") {
-    folder_in = "HighMassLFVMuTau/Faketaus_CR101";
+    folder_in = "HighMassLFVETau/Faketaus_CR101";
   }
   else if (CR == "CR102") {
-    folder_in = "HighMassLFVMuTau/WjetsTest_CR102";
+    folder_in = "HighMassLFVETau/WjetsTest_CR102";
   }
   else if (CR == "CR102b") {
-    folder_in = "HighMassLFVMuTau/WjetsTest_CR102";
+    folder_in = "HighMassLFVETau/WjetsTest_CR102";
   }
   else if (CR == "CR103") {
-    folder_in = "HighMassLFVMuTau/WjetsTest_CR103";
+    folder_in = "HighMassLFVETau/WjetsTest_CR103";
   }
   else if (CR == "prefake") {
-    folder_in = "HighMassLFVMuTau/SignalRegion_CR100";
+    folder_in = "HighMassLFVETau/SignalRegion_CR100";
   }    
   else {
     cout << "unrecognised argument!!!" << endl;
   }
-  name_out = "histos_highmassmutau_"+CR;
+  name_out = "histos_highmassetau_"+CR;
 
   TFile* file_out = new TFile("Figures/"+name_out+".root", "RECREATE");
 
@@ -121,10 +97,10 @@ int main(int argc, char** argv) {
 
   TFile* file_in_faketau;
   if (CR == "CR100") {
-    file_in_faketau = new TFile("HighMassLFVMuTau/Faketaus_CR0.root", "R");
+    file_in_faketau = new TFile("HighMassLFVETau/Faketaus_CR0.root", "R");
   }
   else if (CR == "CR102") {
-    file_in_faketau = new TFile("HighMassLFVMuTau/Faketaus_CR102.root", "R");
+    file_in_faketau = new TFile("HighMassLFVETau/Faketaus_CR102.root", "R");
   }
 
   vector<TFile*> TT_files;
@@ -160,14 +136,14 @@ int main(int argc, char** argv) {
   vars.push_back("tau_pt");           
   vars.push_back("tau_eta");          
   vars.push_back("tau_phi");          
-  vars.push_back("mu_pt");            
-  vars.push_back("mu_eta");           
-  vars.push_back("mu_phi");           
+  vars.push_back("ele_pt");            
+  vars.push_back("ele_eta");           
+  vars.push_back("ele_phi");           
   vars.push_back("ev_DRmutau");       
   vars.push_back("ev_Mt");        
   vars.push_back("ev_MET"); 
   vars.push_back("ev_Mcol"); 
-  vars.push_back("mu_isolation"); 
+  //vars.push_back("mu_isolation"); 
   vars.push_back("sign"); 
   //if (CR == "CR7") vars.push_back("ev_Mt"); 
   //if (CR == "CR9") vars.push_back("ev_Mt"); 
@@ -187,11 +163,6 @@ int main(int argc, char** argv) {
 
   vector<TString> systs;
   systs.push_back("nominal");
-  vector<TString> systs_aux = GetSys();
-  for (unsigned int iAux=0; iAux<systs_aux.size(); ++iAux) {
-    systs.push_back(systs_aux[iAux]+"_up");
-    systs.push_back(systs_aux[iAux]+"_down");
-  }
 
 
   //cross-sections
@@ -307,13 +278,13 @@ int main(int argc, char** argv) {
 	  delete h_data;
 
 	  if (j>0) continue;
-          if (CR == "CR100" || CR == "CR102") {
-            var_in = systs[l]+"_"+vars[i]+"_"+Mth[k];
-            cout << file_in_faketau->GetName() << endl;
-            TH1F* h_faketaus = (TH1F*) file_in_faketau -> Get("faketau_"+var_in);
-            h_faketaus->Write();
-	    delete h_faketaus;
-          }
+          //if (CR == "CR100" || CR == "CR102") {
+          //  var_in = systs[l]+"_"+vars[i]+"_"+Mth[k];
+          //  cout << file_in_faketau->GetName() << endl;
+          //  TH1F* h_faketaus = (TH1F*) file_in_faketau -> Get("faketau_"+var_in);
+          //  h_faketaus->Write();
+	  //  delete h_faketaus;
+          //}
 	}
       }
     }

@@ -54,8 +54,8 @@ int main(/*int argc, char** argv*/) {
   vector<float> xpoints_right {150, 1000};                           xpoints.push_back(xpoints_right);  sector_name.push_back("taupt_150_1000");
 
   vector<vector<float>> ypoints;										      
-  vector<float> ypoints_left {0, 0.5, 0.6, 0.7, 0.75, 1., 3.};  ypoints.push_back(ypoints_left); 
-  vector<float> ypoints_right {0, 0.6, 0.75, 1., 3};		     ypoints.push_back(ypoints_right);
+  vector<float> ypoints_left {0, 0.5, 0.6, 0.65, 0.7, 0.75, 0.8, 1., 3.};  ypoints.push_back(ypoints_left); 
+  vector<float> ypoints_right {0, 0.6, 0.8, 1., 3};		     ypoints.push_back(ypoints_right);
 
   vector<TH2F*> h[names.size()][vars.size()][systs.size()];
   vector<TH2F*> h_MC[vars.size()][systs.size()];

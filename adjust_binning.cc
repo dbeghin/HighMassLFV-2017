@@ -84,6 +84,7 @@ int main(/*int argc, char** argv*/) {
       for (unsigned int k=0; k<vars.size(); ++k) { 
 	for (unsigned int l=0; l<Mth.size(); ++l) {
 	  h[i][j][k].push_back( (TH1F*) file_in->Get(systs[i]+"/"+names[j]+systs[i]+"_"+vars[k]+Mth[l]) );
+	  cout << systs[i]+"/"+names[j]+systs[i]+"_"+vars[k]+Mth[l] << endl;
 	  h[i][j][k][l]->SetName(names[j]+systs[i]+"_"+vars[k]+Mth[l]+"_old");
 
 	  if (simpleRebin[k]) {
