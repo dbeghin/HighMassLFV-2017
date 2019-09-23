@@ -107,13 +107,13 @@ int main(int argc, char** argv) {
 
 
   vector<TFile*> TT_files;
-  TT_files.push_back( new TFile(folder_in+"/Arranged_TT/TT_semilep.root", "R") ); //semilep
-  TT_files.push_back( new TFile(folder_in+"/Arranged_TT/TT_had.root", "R") ); //had
+  //TT_files.push_back( new TFile(folder_in+"/Arranged_TT/TT_semilep.root", "R") ); //semilep
+  //TT_files.push_back( new TFile(folder_in+"/Arranged_TT/TT_had.root", "R") ); //had
   TT_files.push_back( new TFile(folder_in+"/Arranged_TT/TT_2l2nu.root", "R") ); //2l2nu
-  TT_files.push_back( new TFile(folder_in+"/Arranged_TT/TT_500to800.root", "R") );   
-  TT_files.push_back( new TFile(folder_in+"/Arranged_TT/TT_800to1200.root", "R") );  
-  TT_files.push_back( new TFile(folder_in+"/Arranged_TT/TT_1200to1800.root", "R") ); 
-  TT_files.push_back( new TFile(folder_in+"/Arranged_TT/TT_1800toInf.root", "R") );  
+  //TT_files.push_back( new TFile(folder_in+"/Arranged_TT/TT_500to800.root", "R") );   
+  //TT_files.push_back( new TFile(folder_in+"/Arranged_TT/TT_800to1200.root", "R") );  
+  //TT_files.push_back( new TFile(folder_in+"/Arranged_TT/TT_1200to1800.root", "R") ); 
+  //TT_files.push_back( new TFile(folder_in+"/Arranged_TT/TT_1800toInf.root", "R") );  
   
 
   vector<TFile*> VV_files;
@@ -177,8 +177,8 @@ int main(int argc, char** argv) {
 
 
   vector<double> xs_TT;
-  xs_TT.push_back(831.76*0.438); //semilep
-  xs_TT.push_back(831.76*0.457); //had
+  //xs_TT.push_back(831.76*0.438); //semilep
+  //xs_TT.push_back(831.76*0.457); //had
   xs_TT.push_back(831.76*0.105); //2l2nu
   double xs_TT_500to800 = 0.326;             xs_TT.push_back(xs_TT_500to800);
   double xs_TT_800to1200 = 3.26e-2;         xs_TT.push_back(xs_TT_800to1200);

@@ -4,7 +4,6 @@ import ROOT
 sample_path = {}
 
 
-
 ########################### DYJetToLL amc #####################
 path_DYToLL_amc=[
 '/pnfs/iihe/cms/store/user/amkalsi/Legacy_2017/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_DYJetsToLL_M-50_v1/190518_075646/0000/',
@@ -91,8 +90,32 @@ path_WZ=[
 '/pnfs/iihe/cms/store/user/amkalsi/Legacy_2017/WZ_TuneCP5_13TeV-pythia8/crab_WZ/190518_080249/0000/',
 ]
 
+path_WZ_2l2q=[
+'/pnfs/iihe/cms/store/user/dbeghin/Legacy/2017/WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/crab_WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/190612_165016/0000/',
+]
+
+path_WZ_3lnu=[
+'/pnfs/iihe/cms/store/user/dbeghin/Legacy/2017/WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/crab_WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/190612_165403/0000/',
+]
+
+
 path_ZZ=[
 '/pnfs/iihe/cms/store/user/amkalsi/Legacy_2017/ZZ_TuneCP5_13TeV-pythia8/crab_ZZ/190518_080308/0000/',
+]
+
+path_ZZ_2l2nu=[
+'/pnfs/iihe/cms/store/user/dbeghin/Legacy/2017/ZZTo2L2Nu_13TeV_powheg_pythia8/crab_ZZTo2L2Nu_13TeV_powheg_pythia8/190612_164931/0000/',
+]
+
+path_ZZ_2l2q=[
+'/pnfs/iihe/cms/store/user/dbeghin/Legacy/2017/ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/crab_ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/190612_165105/0000/',
+]
+
+path_ZZ_4l=[
+'/pnfs/iihe/cms/store/user/dbeghin/Legacy/2017/ZZTo4L_13TeV_powheg_pythia8/crab_ZZTo4L_13TeV_powheg_pythia8_ext/190612_165318/0000/',
+'/pnfs/iihe/cms/store/user/dbeghin/Legacy/2017/ZZTo4L_13TeV_powheg_pythia8/crab_ZZTo4L_13TeV_powheg_pythia8_ext/190612_165318/0001/',
+'/pnfs/iihe/cms/store/user/dbeghin/Legacy/2017/ZZTo4L_13TeV_powheg_pythia8/crab_ZZTo4L_13TeV_powheg_pythia8_v1/190612_165235/0000/',
+'/pnfs/iihe/cms/store/user/dbeghin/Legacy/2017/ZZTo4L_13TeV_powheg_pythia8/crab_ZZTo4L_13TeV_powheg_pythia8_v2/190612_165150/0000/',
 ]
 
 ################################## ST ###################
@@ -175,12 +198,17 @@ path_ZPrime_6000=["/pnfs/iihe/cms/store/user/amkalsi/Legacy_2017_Signal/ZPrimeTo
 
 #sample_path['WW']                =path_WW
 #sample_path['WW_2l2nu']          =path_WW_2l2nu
-sample_path['WW_200to600']      =path_WW_200to600
+#sample_path['WW_200to600']      =path_WW_200to600
 #sample_path['WW_600to1200']      =path_WW_600to1200
 #sample_path['WW_1200to2500']     =path_WW_1200to2500
 #sample_path['WW_2500toInf']      =path_WW_2500toInf
 #sample_path['WZ']                =path_WZ
+sample_path['WZ_2l2q']           =path_WZ_2l2q
+sample_path['WZ_3lnu']           =path_WZ_3lnu
 #sample_path['ZZ']                =path_ZZ
+sample_path['ZZ_2l2q']           =path_ZZ_2l2q
+sample_path['ZZ_2l2nu']          =path_ZZ_2l2nu
+sample_path['ZZ_4l']             =path_ZZ_4l
 #sample_path['ST']                =path_ST
 #sample_path['DYToLL_amc']        =path_DYToLL_amc
 #sample_path['DYToLL_400to500']   =path_DYToLL_400to500  

@@ -528,6 +528,35 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
       if(!trig_Flag_ecalBadCalibReduced) continue;
 
 
+      //extra electron veto
+      int n_electron = 0;
+      for (unsigned int iEle = 0; iEle < gsf_pt->size(); ++iEle) {
+	if (!(gsf_VID_cutBasedElectronID_Fall17_94X_V1_veto->at(iEle) && gsf_pt->at(iEle) > 10 && fabs(gsf_eta->at(iEle)) < 2.5) ) continue;
+	//TLorentzVector extra_ele_p4;
+	//extra_ele_p4.SetPtEtaPhiE(gsf_pt->at(iEle), gsf_eta->at(iEle), gsf_phi->at(iEle), gsf_energy->at(iEle));
+	//if (tau_p4.DeltaR(extra_ele_p4) > dR_threshold) continue;
+	++n_electron;
+	if (n_electron > 1) break;
+      }
+      if (n_electron > 1) continue;
+
+      //mu-to-tau veto
+      bool extra_muon = false;
+      for (unsigned int jMu = 0; jMu < mu_ibt_pt->size(); ++jMu) {
+	if (mu_ibt_pt->at(jMu) < 30) continue;
+	if (!mu_isHighPtMuon->at(jMu)) continue;
+	if (fabs(mu_ibt_eta->at(jMu)) > 2.4) continue;
+	if (mu_isoTrackerBased03->at(jMu) > 0.15) continue;
+	//TLorentzVector extra_mu_p4;
+	//extra_mu_p4.SetPtEtaPhiM(mu_ibt_pt->at(jMu), mu_ibt_eta->at(jMu), mu_ibt_phi->at(jMu), mu_mass);
+	//if (tau_p4.DeltaR(extra_mu_p4) > dR_threshold) continue;
+	extra_muon = true;
+	break;
+      }
+      if (extra_muon) continue;
+
+
+
       //bjet pair finding (medium WP for the bjet)                                                                                                                           
       int nbjet = 0;
       float bjetMedium2017 = 0.4941;
@@ -546,7 +575,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	    if (fabs(tau_eta->at(iTau)) > 2.3) continue;
 	    if (tau_decayModeFinding->at(iTau) < 0.5) continue;
 	    if (tau_againstMuonLoose3->at(iTau) < 0.5) continue;
-	    if (tau_againstElectronTightMVA6->at(iTau) < 0.5) continue;
+	    if (tau_againstElectronLooseMVA6->at(iTau) < 0.5) continue;
 	    if (fabs(tau_charge->at(iTau)) != 1) continue;
 	    if (tau_byVVLooseIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) < 0.5) continue;
 	  
@@ -560,7 +589,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	    TLorentzVector ele_temp_p4;
 	    ele_temp_p4.SetPtEtaPhiE(gsf_pt->at(iEle), gsf_eta->at(iEle), gsf_phi->at(iEle), gsf_energy->at(iEle));
 	    if (!gsf_VID_heepElectronID_HEEPV70->at(iEle)) continue;
-	    if (gsf_et->at(iEle) < 50) continue;
+	    if (gsf_pt->at(iEle) < 50) continue;
 	  
 	    if (bjet_p4.DeltaR(ele_temp_p4) < 0.5) bele = true;
 	    if (bele) break;
@@ -655,7 +684,8 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
       for (unsigned int ii = 0; ii < eletau_ind.size(); ++ii) {
 	int iEle = eletau_ind[ii][0];
 	int iTau = eletau_ind[ii][1];
-	if (gsf_et->at(iEle) < 50.0) continue;
+	if (gsf_pt->at(iEle) < 50.0) continue;
+	if (fabs(gsf_sc_eta->at(iEle)) > 2.5) continue;
 	if (!gsf_VID_heepElectronID_HEEPV70->at(iEle)) continue;
 
 	TLorentzVector ele_p4;
@@ -676,7 +706,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	if (fabs(tau_eta->at(iTau)) > 2.3) continue;
 	if (tau_decayModeFinding->at(iTau) < 0.5) continue;
 	if (tau_againstMuonLoose3->at(iTau) < 0.5) continue;
-	if (tau_againstElectronTightMVA6->at(iTau) < 0.5) continue;
+	if (tau_againstElectronLooseMVA6->at(iTau) < 0.5) continue;
 	if (fabs(tau_charge->at(iTau)) != 1) continue;
 
 	//control regions : sign selection, muon isolation and tau ID
@@ -910,32 +940,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  k_dm = k_DM10;
 	}
 
-	//extra electron veto
-	bool electron = false;
-	for (unsigned int iEle = 0; iEle < gsf_pt->size(); ++iEle) {
-	  if (!(gsf_VID_heepElectronID_HEEPV70->at(iEle) && gsf_pt->at(iEle) > 40)) continue;
-	  TLorentzVector extra_ele_p4;
-	  extra_ele_p4.SetPtEtaPhiE(gsf_pt->at(iEle), gsf_eta->at(iEle), gsf_phi->at(iEle), gsf_energy->at(iEle));
-	  if (tau_p4.DeltaR(extra_ele_p4) > dR_threshold) continue;
-	  electron = true;
-	  break;
-	}
-	if (electron) continue;
-
-	//mu-to-tau veto
-	bool extra_muon = false;
-	for (unsigned int jMu = 0; jMu < mu_ibt_pt->size(); ++jMu) {
-	  if (mu_ibt_pt->at(jMu) < 30) continue;
-	  if (!mu_isHighPtMuon->at(jMu)) continue;
-	  if (fabs(mu_ibt_eta->at(jMu)) > 2.4) continue;
-	  if (mu_isoTrackerBased03->at(jMu) > 0.1) continue;
-	  TLorentzVector extra_mu_p4;
-	  extra_mu_p4.SetPtEtaPhiM(mu_ibt_pt->at(jMu), mu_ibt_eta->at(jMu), mu_ibt_phi->at(jMu), mu_mass);
-	  if (tau_p4.DeltaR(extra_mu_p4) > dR_threshold) continue;
-	  extra_muon = true;
-	  break;
-	}
-	if (extra_muon) continue;
+	
 
 
 

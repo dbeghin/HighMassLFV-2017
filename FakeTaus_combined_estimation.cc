@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
   //names.push_back("QCD_");//2
   names.push_back("DY_");
   names.push_back("TT_");
-  //names.push_back("ST_");
+  names.push_back("ST_");
   names.push_back("VV_");
 
   vector<TString> vars;

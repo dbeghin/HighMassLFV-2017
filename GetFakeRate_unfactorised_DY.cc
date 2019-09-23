@@ -16,8 +16,10 @@
 
 using namespace std;
 int main(/*int argc, char** argv*/) {
-  TFile* file_out = new TFile("HighMassLFVMuTau/fakerate_unfactorised_DY.root", "RECREATE");
-  TFile* file_in  = new TFile("Figures/histos_fakerate_DY.root", "R");
+  //TFile* file_out = new TFile("HighMassLFVMuTau/fakerate_unfactorised_DY.root", "RECREATE");
+  //TFile* file_in  = new TFile("Figures/histos_fakerate_DY.root", "R");
+  TFile* file_out = new TFile("HighMassLFVMuTau/fakerate_unfactorised_DY_ll.root", "RECREATE");
+  TFile* file_in  = new TFile("Figures/histos_fakerate_DY_ll.root", "R");
 
   vector<TString> names;
   names.push_back("data_");//0
@@ -38,12 +40,12 @@ int main(/*int argc, char** argv*/) {
 
   //vector<float> xpoints_all {0, 30, 40, 50, 60, 70, 80, 100, 120, 150, 300, 1000};
   vector<vector<float>> xpoints;                                                                        vector<TString> sector_name;
-  vector<float> xpoints_left {0, 30, 50, 70, 100, 150};  xpoints.push_back(xpoints_left);   sector_name.push_back("taupt_0_150");
-  vector<float> xpoints_right {150, 1000};               xpoints.push_back(xpoints_right);  sector_name.push_back("taupt_150_1000");
+  vector<float> xpoints_left {0, 30, 50, 80, 150};  xpoints.push_back(xpoints_left);   sector_name.push_back("taupt_0_150");
+  vector<float> xpoints_right {150, 1000};          xpoints.push_back(xpoints_right);  sector_name.push_back("taupt_150_1000");
 
   vector<vector<float>> ypoints;										      
-  vector<float> ypoints_left {0, 0.7, 0.8, 1., 3.};      ypoints.push_back(ypoints_left); 
-  vector<float> ypoints_right {0, 1., 3};		      ypoints.push_back(ypoints_right);
+  vector<float> ypoints_left {0, 0.6, 0.7, 0.8, 1., 3.};      ypoints.push_back(ypoints_left); 
+  vector<float> ypoints_right {0, 0.7, 3};		      ypoints.push_back(ypoints_right);
 
   vector<TH2F*> h[names.size()][vars.size()][dms.size()];
   for (unsigned int j=0; j<names.size(); ++j) {
@@ -129,7 +131,7 @@ int main(/*int argc, char** argv*/) {
 	    ++iBinX;
 	  }
 	  
-	  if (bin_content < 0) bin_content = 0;
+	  //if (bin_content < 0) bin_content = 0;
 	  if (k%2 == 0) {
 	    hpass_data[half_k][sector][i]->SetBinContent(jBinX, jBinY, bin_content);
 	    hpass_data[half_k][sector][i]->SetBinError(jBinX, jBinY, sqrt(bin_error));
