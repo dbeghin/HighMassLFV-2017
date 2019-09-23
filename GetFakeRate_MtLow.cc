@@ -47,7 +47,7 @@ int main(/*int argc, char** argv*/) {
 
 
   vector<float> xpoints_taupt {0, 30, 40, 50, 60, 70, 80, 100, 120, 150, 300, 1000};
-  vector<float> ypoints_ratio {0, 0.3/*, 0.4*/, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 1., 2.};
+  vector<float> ypoints_ratio {0, 0.5, 0.6, 0.7, 0.75, 0.8, 1., 2.};
   //vector<float> ypoints_ratio {0, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1., 10.};
 
 

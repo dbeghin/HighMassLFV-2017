@@ -15,7 +15,6 @@
 // Header file for the classes stored in the TTree if any.
 #include "string"
 #include "vector"
-#include "vector"
 
 class meta {
 public :
