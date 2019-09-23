@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
   in_names.push_back("DY_");  		  out_names.push_back("DY");  
   in_names.push_back("VV_");   		  out_names.push_back("VV");   
   in_names.push_back("TT_");   		  out_names.push_back("TT");   
-  //in_names.push_back("ST_");   		  out_names.push_back("ST");   
+  in_names.push_back("ST_");   		  out_names.push_back("ST");   
   in_names.push_back("data_"); 		  out_names.push_back("data_obs");
 
 
@@ -94,12 +94,15 @@ int main(int argc, char** argv) {
   }
 
   for (unsigned int j=0; j<mass.size(); ++j) {
-    TString name_in = mass[j]+"_Mcol";
-    TString name_out = "Zprime_"+mass[j];
-    TH1F* h = (TH1F*) file_in_signal->Get(name_in);
-    h->SetName(name_out);
-    h->SetTitle(name_out);
-    h->Write();
+    for (unsigned int k=0; k<in_sys.size(); ++k) {
+      TString name_in = "ZPrime_"+mass[j]+"_ev_Mcol_MtHigh";
+      TString name_out = "Zprime_"+mass[j]+"_"+out_sys[k];
+      TH1F* h = (TH1F*) file_in_signal->Get(in_sys[k]+"/"+name_in);
+      h->SetName(name_out);
+      h->SetTitle(name_out);
+      h->Write();
+      delete h;
+    }
   }
   signal_dir->Close();
   file_out->Close();
