@@ -1,6 +1,5 @@
 #define IIHEAnalysis_cxx
-//#include "aux.h"
-#include "IIHEAnalysis_2017.h"
+#include "SF_and_systematics.cc"
 #include "meta.h"
 
 using namespace std;
@@ -10,21 +9,22 @@ int main(int argc, char** argv) {
   string out_name= out;
   string in = *(argv + 2);
   string inname= in;
-  string mc_in = *(argv + 3);
-  string mc_nickname= mc_in;
-  string phase_in = *(argv + 4);
+  string phase_in = *(argv + 3);
   string phase= phase_in;
-  string type_in = *(argv + 5);
+  string type_in = *(argv + 4);
   string type= type_in;
   TFile *fIn = TFile::Open(inname.c_str());
   TTree* tree = (TTree*) fIn->Get("IIHEAnalysis");
+
 
   TTree* mmeta = (TTree*) fIn->Get("meta");
   meta* m = new meta(mmeta);
   Float_t nEvents = m->Loop(type);
 
+  string mc_nick = "eh";
+
   IIHEAnalysis* a = new IIHEAnalysis(tree);
-  a->Loop(phase, type, out_name, mc_nickname, nEvents);
+  a->Loop(phase, type, out_name, mc_nick, nEvents);
   return 0;
 }
 
@@ -96,19 +96,8 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
    histo_names.push_back("mu_pt");          nBins.push_back(500);  x_min.push_back(0);    x_max.push_back(500);
    histo_names.push_back("mu_eta");         nBins.push_back(50);   x_min.push_back(-2.5); x_max.push_back(2.5);
    histo_names.push_back("mu_phi");         nBins.push_back(64);   x_min.push_back(-3.2); x_max.push_back(3.2);
-   histo_names.push_back("mu1_pt");         nBins.push_back(500);  x_min.push_back(0);    x_max.push_back(500);
-   histo_names.push_back("mu1_eta");        nBins.push_back(50);   x_min.push_back(-2.5); x_max.push_back(2.5);
-   histo_names.push_back("mu1_phi");        nBins.push_back(64);   x_min.push_back(-3.2); x_max.push_back(3.2);
-   histo_names.push_back("mu2_pt");         nBins.push_back(500);  x_min.push_back(0);    x_max.push_back(500);
-   histo_names.push_back("mu2_eta");        nBins.push_back(50);   x_min.push_back(-2.5); x_max.push_back(2.5);
-   histo_names.push_back("mu2_phi");        nBins.push_back(64);   x_min.push_back(-3.2); x_max.push_back(3.2);
    histo_names.push_back("ev_DRmumu");      nBins.push_back(100);  x_min.push_back(0);    x_max.push_back(10);
-   histo_names.push_back("ev_Mt_raw");      nBins.push_back(150);  x_min.push_back(0);    x_max.push_back(150);
-   histo_names.push_back("ev_Mt");          nBins.push_back(150);  x_min.push_back(0);    x_max.push_back(150);
    histo_names.push_back("ev_Mvis");        nBins.push_back(40);   x_min.push_back(70);   x_max.push_back(110);
-   histo_names.push_back("ev_METmumass");   nBins.push_back(150);  x_min.push_back(0);    x_max.push_back(150);
-   histo_names.push_back("ev_MET");         nBins.push_back(100);  x_min.push_back(0);    x_max.push_back(100);
-   histo_names.push_back("ev_METphi");      nBins.push_back(64);   x_min.push_back(-3.2); x_max.push_back(3.2);
    histo_names.push_back("ev_Nvertex");     nBins.push_back(81);   x_min.push_back(-0.5); x_max.push_back(80.5);
 
    vector<TH1F*> h;
@@ -117,28 +106,35 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
      h[i]->Sumw2();
    }
 
-   vector<TString> htau_names;                
-   htau_names.push_back("taupt_ratio_pass");  
-   htau_names.push_back("taupt_ratio_fail");  
+   vector<TString> htau_names;                    vector<int> nBins_tau;     vector<float> x_min_tau,   x_max_tau; 
+   htau_names.push_back("taupt_ratio_pass");      nBins_tau.push_back(1000); x_min_tau.push_back(0);    x_max_tau.push_back(1000);
+   htau_names.push_back("taupt_ratio_fail");      nBins_tau.push_back(1000); x_min_tau.push_back(0);    x_max_tau.push_back(10);
+
+   vector<TString> flavor;
+   flavor.push_back("quark"); int d_quark = flavor.size()-1;
+   flavor.push_back("gluon"); int d_gluon = flavor.size()-1;
 
    vector<TString> dms;
    dms.push_back("DM0");
    dms.push_back("DM1");
    dms.push_back("DM10");
+   dms.push_back("DM11");
 
    vector<TString> eta;
    eta.push_back("barrel");
    eta.push_back("endcap");
 
 
-   vector<TH2D*> hh[htau_names.size()][dms.size()];
+   vector<TH2D*> hh[htau_names.size()][dms.size()][flavor.size()];
 
    for (unsigned int i = 0; i<htau_names.size(); ++i) {
      for (unsigned int k = 0; k<dms.size(); ++k) {
-       for (unsigned int l = 0; l<eta.size(); ++l) {
-	 TString nname = htau_names[i]+"_"+dms[k]+"_"+eta[l];
-	 hh[i][k].push_back( new TH2D(nname, nname, 1000, 0, 1000, 1000, 0, 10) );
-	 hh[i][k][l]->Sumw2();
+       for (unsigned int dd = 0; dd<flavor.size(); ++dd) {
+	 for (unsigned int l = 0; l<eta.size(); ++l) {
+	   TString nname = htau_names[i]+"_"+dms[k]+"_"+flavor[dd]+"_"+eta[l];
+	   hh[i][k][dd].push_back( new TH2D(nname, nname, 500, 0, 1000, 500, 0, 5) );
+	   hh[i][k][dd][l]->Sumw2();
+	 }
        }
      }
    }
@@ -157,6 +153,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
       if (jEntry % 1000 == 0) fprintf(stdout, "\r  Processed events: %8d of %8d ", jEntry, nEntries);
       //if (jEntry % 10 == 0) cout << endl << "Processed events: " << jEntry << " of " << nEntries;
 
+      
       nb = fChain->GetEntry(jEntry);
       nbytes += nb;
 
@@ -173,10 +170,9 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
       if(!trig_Flag_HBHENoiseIsoFilter_accept) continue;
       if(!trig_Flag_EcalDeadCellTriggerPrimitiveFilter_accept) continue;
       if(!trig_Flag_BadPFMuonFilter_accept) continue;
-      if(!trig_Flag_ecalBadCalibReduced) continue;
-      if(data && !trig_Flag_eeBadScFilter_accept) continue;
 
-      //Sort muons, taus, by increasing isolation/decreasing pt                                                                                                                   
+
+      //Sort muons, taus, by increasing isolation/decreasing pt
       float iso = 1.5, pt = 0.0;
       int lowest = -1;
       vector<int> orderedMu, orderedTau;
@@ -226,7 +222,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  if (found_mumu_pair) break;
 	  int iMu2 = orderedMu[jj];
 
-	  if (mu_gt_pt->at(iMu1) < 26.0) continue;
+	  if (mu_gt_pt->at(iMu1) < 30.0) continue;
 	  if (fabs(mu_gt_eta->at(iMu1)) > 2.4) continue;
 	  if (!mu_isPFMuon->at(iMu1)) continue;
 	  if (!mu_isMediumMuon->at(iMu1)) continue; //medium ID
@@ -235,7 +231,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  float reliso = mu_pfIsoDbCorrected04->at(iMu1);
 	  if (reliso > 0.15) continue;
 
-	  if (mu_gt_pt->at(iMu2) < 26.0) continue;
+	  if (mu_gt_pt->at(iMu2) < 30.0) continue;
 	  if (fabs(mu_gt_eta->at(iMu2)) > 2.4) continue;
 	  if (!mu_isPFMuon->at(iMu2)) continue; //medium ID
 	  if (!mu_isMediumMuon->at(iMu2)) continue; //medium ID
@@ -244,7 +240,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  reliso = mu_pfIsoDbCorrected04->at(iMu2);
 	  if (reliso > 0.15) continue;
 
-	  TLorentzVector mu1_p4, mu2_p4, total_p4, met_p4, metmu_p4;
+	  TLorentzVector mu1_p4, mu2_p4, total_p4;
 	  mu1_p4.SetPtEtaPhiM(mu_gt_pt->at(iMu1), mu_gt_eta->at(iMu1), mu_gt_phi->at(iMu1), mu_mass);
 	  mu2_p4.SetPtEtaPhiM(mu_gt_pt->at(iMu2), mu_gt_eta->at(iMu2), mu_gt_phi->at(iMu2), mu_mass);
 	  total_p4 = mu1_p4 + mu2_p4;
@@ -254,18 +250,16 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  if (mu_gt_charge->at(iMu1) * mu_gt_charge->at(iMu2) > 0) continue; //SS veto
 
 	  if (!data) {
-            final_weight = mc_w_sign*GetReweight_mumu(mu1_p4.Pt(), mu1_p4.Eta(), mu2_p4.Pt(), mu2_p4.Eta())*GetPUWeight(mc_trueNumInteractions,mc_nick,"nom");
-          }
+	    final_weight = mc_w_sign;
+	  }
 	  
-	  met_p4.SetPtEtaPhiM(MET_T1Txy_Pt, 0, MET_T1Txy_phi, 0);
-	  metmu_p4 = met_p4 + mu1_p4;
 	  
 
 	  if (final_weight != final_weight) continue;
 
 
 	  float dR = mu1_p4.DeltaR(mu2_p4);
-	  h[9]->Fill(dR, final_weight);
+	  h[3]->Fill(dR, final_weight);
 	  if (dR < 0.5) continue;
 
 	  h_reweight->Fill(final_weight);
@@ -275,11 +269,11 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	  for (unsigned int iTau = 0; iTau < tau_pt->size(); ++iTau) {
 	    if (tau_pt->at(iTau) < 30.0) continue;
 	    if (fabs(tau_eta->at(iTau)) > 2.3) continue;
-	    if (tau_decayModeFinding->at(iTau) < 0.5) continue;
-	    if (tau_againstMuonLoose3->at(iTau) < 0.5) continue;  //FIXME
-	    if (tau_againstElectronLooseMVA6->at(iTau) < 0.5) continue;
-	    //if (tau_againstMuonLoose3->at(iTau) < 0.5) continue;  //FIXME
-	    //if (tau_againstElectronTightMVA6->at(iTau) < 0.5) continue;
+	    if (tau_byLooseDeepTau2017v2p1VSmu->at(iTau) < 0.5) continue;
+            if (tau_byLooseDeepTau2017v2p1VSe->at(iTau) < 0.5) continue;
+            if (tau_byVVLooseDeepTau2017v2p1VSjet->at(iTau) < 0.5) continue;
+            if (tau_decayModeFindingNewDMs->at(iTau) < 0.5) continue;
+            if (tau_decayMode->at(iTau) == 5 || tau_decayMode->at(iTau) == 6) continue;
 
 	    TLorentzVector tau_p4;
 	    tau_p4.SetPxPyPzE(tau_px->at(iTau), tau_py->at(iTau), tau_pz->at(iTau), tau_energy->at(iTau));
@@ -288,18 +282,25 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	    
 	    // MATCH TAUS TO AK4 jets
 	    bool matched_to_reco_jet=false;
+	    int dJetFlavor = -1;
 	    TLorentzVector jet_p4(0.,0.,0.,0.);
 	    for (unsigned int ijet = 0; ijet < jet_pt->size(); ijet++){
 	      if(!(fabs(jet_eta->at(ijet)) < 2.3)) continue;
-	      if(!(jet_isJetID_2017->at(ijet))) continue;
+	      bool looseJet = false;
+	      if (data) looseJet = jet_isJetIDLoose_2016->at(ijet);
+	      else looseJet = jet_isJetIDLoose_2016->at(ijet);
+	      if(!looseJet) continue;
 	      TLorentzVector jet_p4_tmp;
 	      jet_p4_tmp.SetPxPyPzE(jet_px->at(ijet), jet_py->at(ijet), jet_pz->at(ijet), jet_energy->at(ijet));
 	      if(!(tau_p4.DeltaR(jet_p4_tmp) < 0.2)) continue;
+	      if (abs(jet_partonFlavour->at(ijet)) == 21) dJetFlavor = d_gluon;
+	      else if (abs(jet_partonFlavour->at(ijet)) <= 6) dJetFlavor = d_quark;
 	      matched_to_reco_jet=true;
 	      jet_p4=jet_p4_tmp;
 	      break;
-
 	    }
+
+	    if (dJetFlavor < 0) continue;
 
 	    if(!(matched_to_reco_jet)) continue;
 	    float ratio = 0;
@@ -317,23 +318,9 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	    h[2]->Fill(mu_gt_phi->at(iMu2), final_weight);
 	    
 
-	    //Mu1 histos
-	    h[3]->Fill(mu_gt_pt->at(iMu1), final_weight);
-	    h[4]->Fill(mu_gt_eta->at(iMu1), final_weight);
-	    h[5]->Fill(mu_gt_phi->at(iMu1), final_weight);
-
-
-	    //Mu2 histos
-	    h[6]->Fill(mu_gt_pt->at(iMu2), final_weight);
-	    h[7]->Fill(mu_gt_eta->at(iMu2), final_weight);
-	    h[8]->Fill(mu_gt_phi->at(iMu2), final_weight);
-
-	    
 	    //misc. hitos
-	    h[12]->Fill(total_p4.M(), final_weight);
-	    h[14]->Fill(met_p4.Pt(), final_weight);
-	    h[15]->Fill(met_p4.Phi(), final_weight);
-	    h[16]->Fill(pv_n, final_weight);
+	    h[4]->Fill(total_p4.M(), final_weight);
+	    h[5]->Fill(pv_n, final_weight);
 
 	    int j_dm = -1, k_eta = -1;
 	    bool bTautrigger = false;
@@ -346,6 +333,12 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	    else if (tau_decayMode->at(iTau) == 10) {
 	      j_dm = 2;
 	    }
+	    else if (tau_decayMode->at(iTau) == 11) {
+	      j_dm = 3;
+	    }
+	    else {
+	      continue;
+	    }
 
 	    TString eta_string = GetEtaString(tau_eta->at(iTau));
 	    if (eta_string == "barrel") {
@@ -357,13 +350,12 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 	    if (j_dm == -1 || k_eta == -1) continue;
 
 	    cout << eta_string << endl;
-	    cout << "vvloose " << tau_byVVLooseIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) << endl;
 	    //Tau histos
-	    if (tau_byTightIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) > 0.5) {
-	      hh[0][j_dm][k_eta]->Fill(tau_pt->at(iTau), ratio, final_weight);
+            if (tau_byTightDeepTau2017v2p1VSjet->at(iTau) > 0.5) {
+	      hh[0][j_dm][dJetFlavor][k_eta]->Fill(tau_pt->at(iTau), ratio, final_weight);
 	    }
-	    if ((tau_byTightIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) < 0.5) && (tau_byVVLooseIsolationMVArun2017v2DBoldDMwLT2017->at(iTau) > 0.5)) {
-	      hh[1][j_dm][k_eta]->Fill(tau_pt->at(iTau), ratio, final_weight);
+	    if ((tau_byTightDeepTau2017v2p1VSjet->at(iTau) < 0.5) && (tau_byVVLooseDeepTau2017v2p1VSjet->at(iTau) > 0.5)) {
+	      hh[1][j_dm][dJetFlavor][k_eta]->Fill(tau_pt->at(iTau), ratio, final_weight);
 	    }
 	  }//loop over taus
 	}//loop over mus
@@ -376,7 +368,7 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
    h_total_events->Write();
    h_reweight->Write();
    for (unsigned int i = 0; i<histo_names.size(); ++i) h[i]->Write();
-   for (unsigned int i=0; i<htau_names.size(); ++i) for (unsigned int j=0; j<dms.size(); ++j) for (unsigned int k=0; k<eta.size(); ++k) hh[i][j][k]->Write();
+   for (unsigned int i=0; i<htau_names.size(); ++i) for (unsigned int j=0; j<dms.size(); ++j) for (unsigned int dd=0; dd<flavor.size(); ++dd) for (unsigned int k=0; k<eta.size(); ++k) hh[i][j][dd][k]->Write();
    file_out->Close();
 
 }
