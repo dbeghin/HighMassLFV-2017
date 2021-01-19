@@ -12,6 +12,9 @@ print file_list
 str_head='''
 #include <map>
 #include <iostream>
+
+using namespace std;
+
 namespace PU_2017_Rereco{
 '''
 str_end='''
