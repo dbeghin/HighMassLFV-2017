@@ -40,13 +40,15 @@ void IIHEAnalysis::Loop(string controlregion, string type_of_data, string out_na
 
    //list here the names and x-axis ranges of all gen-level histos we wish to create :
    vector<TString> histo_names;         vector<int> nBins;      vector<float> x_min,    x_max; 
-   histo_names.push_back("Mgen");       nBins.push_back(4000);  x_min.push_back(0);     x_max.push_back(4000);
-   histo_names.push_back("Mvis");       nBins.push_back(4000);  x_min.push_back(0);     x_max.push_back(4000);
-   histo_names.push_back("Mtot");       nBins.push_back(4000);  x_min.push_back(0);     x_max.push_back(4000);
-   histo_names.push_back("Mcol");       nBins.push_back(4000);  x_min.push_back(0);     x_max.push_back(4000);
+   histo_names.push_back("Mgen");       nBins.push_back(8000);  x_min.push_back(0);     x_max.push_back(8000);
+   histo_names.push_back("Mvis");       nBins.push_back(8000);  x_min.push_back(0);     x_max.push_back(8000);
+   histo_names.push_back("Mtot");       nBins.push_back(8000);  x_min.push_back(0);     x_max.push_back(8000);
+   histo_names.push_back("Mcol");       nBins.push_back(8000);  x_min.push_back(0);     x_max.push_back(8000);
+   histo_names.push_back("oldMcol");    nBins.push_back(8000);  x_min.push_back(0);     x_max.push_back(8000);
    histo_names.push_back("Mvis_res");   nBins.push_back(2000);  x_min.push_back(-1);    x_max.push_back(1);
    histo_names.push_back("Mtot_res");   nBins.push_back(2000);  x_min.push_back(-1);    x_max.push_back(1);
    histo_names.push_back("Mcol_res");   nBins.push_back(2000);  x_min.push_back(-1);    x_max.push_back(1);
+   histo_names.push_back("oldMcol_res");nBins.push_back(2000);  x_min.push_back(-1);    x_max.push_back(1);
 
    vector<TH1F*> h;
    for (unsigned int i = 0; i<histo_names.size(); ++i) {

@@ -153,6 +153,7 @@ def make_plot(var_out, Data, DY, TT, VV, ST, Faketau, sq_combined_error, signal_
         sq_norm_error += pow(VV.GetBinContent(iii)*0.04, 2) #error on VV xs: 4%
         sq_norm_error += pow(DY.GetBinContent(iii)*0.02, 2) #error on VV xs: 2%
         sq_norm_error += pow(ST.GetBinContent(iii)*0.05, 2) #error on VV xs: 5%
+        sq_norm_error += pow(Faketau.GetBinContent(iii)*0.5, 2) #systematic on fake rate: 50%
         sq_norm_error += pow( (DY.GetBinContent(iii) + TT.GetBinContent(iii) + ST.GetBinContent(iii) + VV.GetBinContent(iii))*0.025, 2) #error on lumi: 2.5%
 
         bin_error_up = pow(sq_combined_error["up"].GetBinContent(iii) + sq_norm_error + pow(errorBand.GetBinError(iii),2), 0.5)
@@ -192,12 +193,12 @@ def make_plot(var_out, Data, DY, TT, VV, ST, Faketau, sq_combined_error, signal_
     
     Data.GetXaxis().SetLabelSize(0)
     if (var_log_dic[var[k]]):
-        Data.SetMaximum(Data.GetMaximum()*10**6)#1.5)#FIXME
+        Data.SetMaximum(Data.GetMaximum()*10**5)#1.5)#FIXME
         #ST.SetMaximum(Data.GetMaximum()*200)#1.5)#FIXME
     else:
         Data.SetMaximum(Data.GetMaximum()*3)#2.5)#FIXME
         #ST.SetMaximum(Data.GetMaximum()*2)#2.5)#FIXME
-    Data.SetMinimum(10**(-6))
+    Data.SetMinimum(10**(-4))
     Data.Draw("e")
     #ST.Draw("hist")
     stack.Draw("histsame")
@@ -215,7 +216,7 @@ def make_plot(var_out, Data, DY, TT, VV, ST, Faketau, sq_combined_error, signal_
     
     legende=make_legend(0.5, 0.62, 0.92, 0.85)
     legende.AddEntry(Data,"Observed","elp")
-    legende.AddEntry(DY,"Z#rightarrow#tau #tau","f")
+    legende.AddEntry(DY,"Z#rightarrow ll","f")
     legende.AddEntry(Faketau,"Fake #tau bg","f")
     legende.AddEntry(TT,"t#bar{t}+jets","f")
     legende.AddEntry(VV,"Diboson","f")
@@ -276,13 +277,21 @@ def make_plot(var_out, Data, DY, TT, VV, ST, Faketau, sq_combined_error, signal_
     pad2.Draw()
     pad2.cd()
     h1=Data.Clone()
-    h1.SetMaximum(4.)#FIXME(1.6)
-    h1.SetMinimum(0.0)#FIXME(0.4)
+    h1.SetMaximum(2.)#FIXME(1.6)
+    h1.SetMinimum(0.)#FIXME(0.4)
     h1.SetMarkerStyle(20)
     h3=errorBand_ersatz.Clone()
     hwoE=errorBand.Clone()
-    for iii in range (1,hwoE.GetSize()-2):
+    for iii in range (1,hwoE.GetSize()-1):
         hwoE.SetBinError(iii,0)
+        bin_error_data = h1.GetBinError(iii)
+        PoissonUpperBoundAtZero = 1.8
+        if (var_log_dic[var[k]]):
+            normPoisson = PoissonUpperBoundAtZero/(h1.GetBinWidth(iii))
+	else:
+            normPoisson = PoissonUpperBoundAtZero
+        if bin_error_data < normPoisson: bin_error_data = normPoisson
+        h1.SetBinError(iii, bin_error_data)
     h3.Sumw2()
 
     h1.Sumw2()
@@ -355,6 +364,7 @@ var.append("ev_MET")
 var.append("ev_Mcol")          
 var.append("ev_Mt")            
 var.append("sign")
+var.append("ev_Nvertex")
 
 var_log_dic = {
 "ev_Mvis"          : True,           
@@ -373,6 +383,7 @@ var_log_dic = {
 "ev_Mcol"          : True,
 "ev_Mt"            : True,
 "sign"             : False,
+"ev_Nvertex"       : False,
 }
 
 nvar=len(var)
@@ -395,6 +406,7 @@ photogenic_var={
 "ev_Mcol":              "m_{col}",
 "ev_Mt":                "m_{T}",
 "sign":                 "OS (left) versus SS (right)",
+"ev_Nvertex":           "N_{vtx}",
 }
 
 Mth=[
@@ -407,7 +419,17 @@ Mth=[
 ]
 
 systs_aux=[
-"TES",
+"TrueTESdm0",
+"TrueTESdm1",
+"TrueTESdm10",
+"TrueTESdm11",
+"FakeEleTESdm0",
+"FakeEleTESdm1",
+"FakeMuTESdm0",
+"FakeMuTESdm1",
+"METJetEn",
+"METJetRes",
+"METUnclustered",
 "MES",
 "mres",
 "minbias",
@@ -418,9 +440,13 @@ systs_aux=[
 "tauID",
 "eletauFR",
 "mutauFR",
-"FRstat",
+#"FRstat",
 #"FRsys",
-"topPt",
+#"topPt",
+"topQscale",
+"topPDF",
+"WWPDF",
+"prefiring",
 ]
 
 systs_up=[]
@@ -441,10 +467,10 @@ systs["down"]=systs_down
 
 
 signal_names={
-    "Z' 1000 GeV" :   "ZPrime_1000",
+    #"Z' 1000 GeV" :   "ZPrime_1000",
     #"Z' 2000 GeV" :   "ZPrime_2000",
     #"Z' 3000 GeV" :   "ZPrime_3000",
-    "Z' 4000 GeV" :   "ZPrime_4000",
+    #"Z' 4000 GeV" :   "ZPrime_4000",
 }
 
 for k in range (0,nvar):
